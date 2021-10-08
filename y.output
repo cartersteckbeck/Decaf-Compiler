@@ -1,0 +1,134 @@
+Terminals unused in grammar
+
+   "void"
+   "double"
+   "bool"
+   "string"
+   "class"
+   "interface"
+   "null"
+   "this"
+   "extends"
+   "implements"
+   "for"
+   "while"
+   "if"
+   "else"
+   "return"
+   "break"
+   "New"
+   "NewArray"
+   "Print"
+   "ReadInteger"
+   "ReadLine"
+   "<="
+   ">="
+   "=="
+   "!="
+   "&&"
+   "||"
+   "[]"
+   T_DBLLITERAL
+   T_INTLITERAL
+   T_BOOLLITERAL
+   T_IDENTIFIER
+   T_TYPEIDENTIFIER
+   T_STRINGLITERAL
+
+
+Grammar
+
+    0 $accept: pgm $end
+
+    1 pgm: program
+
+    2 program: "int"
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+"void" (260)
+"int" (261) 2
+"double" (262)
+"bool" (263)
+"string" (264)
+"class" (265)
+"interface" (266)
+"null" (267)
+"this" (268)
+"extends" (269)
+"implements" (270)
+"for" (271)
+"while" (272)
+"if" (273)
+"else" (274)
+"return" (275)
+"break" (276)
+"New" (277)
+"NewArray" (278)
+"Print" (279)
+"ReadInteger" (280)
+"ReadLine" (281)
+"<=" (282)
+">=" (283)
+"==" (284)
+"!=" (285)
+"&&" (286)
+"||" (287)
+"[]" (288)
+T_DBLLITERAL (289)
+T_INTLITERAL (290)
+T_BOOLLITERAL (291)
+T_IDENTIFIER (292)
+T_TYPEIDENTIFIER (293)
+T_STRINGLITERAL (294)
+
+
+Nonterminals, with rules where they appear
+
+$accept (38)
+    on left: 0
+pgm (39)
+    on left: 1, on right: 0
+program (40)
+    on left: 2, on right: 1
+
+
+State 0
+
+    0 $accept: . pgm $end
+
+    "int"  shift, and go to state 1
+
+    pgm      go to state 2
+    program  go to state 3
+
+
+State 1
+
+    2 program: "int" .
+
+    $default  reduce using rule 2 (program)
+
+
+State 2
+
+    0 $accept: pgm . $end
+
+    $end  shift, and go to state 4
+
+
+State 3
+
+    1 pgm: program .
+
+    $default  reduce using rule 1 (pgm)
+
+
+State 4
+
+    0 $accept: pgm $end .
+
+    $default  accept
