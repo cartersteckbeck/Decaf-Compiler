@@ -73,7 +73,32 @@ pgm: program { top = $$ = $1; }
 */
 
 /* This is a stub. We are not discussing parsing yet. */
-program: T_INT { $$ = new parse_tree(mytok); }
+program: decl { $$ = $1; }
+//
+decl: /* empty */  {$$ = new parse_tree("program"); }
+      |  decl varDecl { $1->add_child($2); $$ = $1; }
 
+varDecl: usertype identifier[i1] ';' { $$ = new parse_tree("variable", 2, $usertype, $i1); }
+       | primtype identifier[i2] ';' { $$ = new parse_tree("variable", 2, $primtype, $i2); }
+       | arraytype identifier[i3] ';' { $$ = new parse_tree("variable", 2, $arraytype, $i3); }
+
+usertype: typeidentifier {$$ = new parse_tree("usertype", 1, $typeidentifier); }
+
+primtype: string {$$ = new parse_tree("primtype", 1, $string); }
+
+arraytype: usertype array[a1] {$$ = new parse_tree("arraytype", 1, $usertype); }
+         | primtype array[a2] {$$ = new parse_tree("arraytype", 1, $primtype); }
+
+
+
+/* TERMINAL PRODUCTIONS */
+
+typeidentifier: T_TYPEIDENTIFIER { $$ = new parse_tree(mytok); }
+identifier: T_IDENTIFIER { $$ = new parse_tree(mytok); }
+string: T_STRING { $$ = new parse_tree(mytok); }
+// intlit: T_INTLITERAL { $$ = new parse_tree(mytok); }
+// double: T_DOUBLE { $$ = new parse_tree(mytok); }
+// bool: T_BOOL { $$ = new parse_tree(mytok); }
+array: T_ARRAY { $$ = new parse_tree(mytok); }
 
 %%

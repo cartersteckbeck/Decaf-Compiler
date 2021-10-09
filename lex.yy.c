@@ -1471,12 +1471,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 139 "decaf.l"
+#line 140 "decaf.l"
 {lex_error("Unrecognized character");}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 140 "decaf.l"
+#line 141 "decaf.l"
 ECHO;
 	YY_BREAK
 #line 1483 "lex.yy.c"
@@ -2413,7 +2413,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 140 "decaf.l"
+#line 141 "decaf.l"
 
 
 
