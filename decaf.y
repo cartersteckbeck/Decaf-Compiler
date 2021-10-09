@@ -67,38 +67,66 @@ int yyerror(char const *s)
 * change this line rather than using the %start directive from yacc/bison.
 * (Crucially, this line sets the "top" variable.)
 */
-pgm: program { top = $$ = $1; }
+pgm: program {top = $$ = $1; }
 
 /* Language grammar follows:
 */
 
 /* This is a stub. We are not discussing parsing yet. */
-program: decl { $$ = $1; }
-//
-decl: /* empty */  {$$ = new parse_tree("program"); }
-      |  decl varDecl { $1->add_child($2); $$ = $1; }
+program: decl {$$ = $1; }
 
-varDecl: usertype identifier[i1] ';' { $$ = new parse_tree("variable", 2, $usertype, $i1); }
-       | primtype identifier[i2] ';' { $$ = new parse_tree("variable", 2, $primtype, $i2); }
-       | arraytype identifier[i3] ';' { $$ = new parse_tree("variable", 2, $arraytype, $i3); }
+decl: /* empty */ {$$ = new parse_tree("program"); }
+      | decl varDecl {$1->add_child($2); $$ = $1; }
+      | decl funcDecl {$1->add_child($2); $$ = $1; }
+
+
+/* Variable Declarations */
+varDecl: variable ';'
+
+variable: type identifier {$$ = new parse_tree("variable", 2, $type, $identifier); }
+
+type: usertype | primtype | arraytype
 
 usertype: typeidentifier {$$ = new parse_tree("usertype", 1, $typeidentifier); }
 
 primtype: string {$$ = new parse_tree("primtype", 1, $string); }
+        | int {$$ = new parse_tree("primtype", 1, $int); }
+        | double {$$ = new parse_tree("primtype", 1, $double); }
+        | bool {$$ = new parse_tree("primtype", 1, $bool); }
 
 arraytype: usertype array[a1] {$$ = new parse_tree("arraytype", 1, $usertype); }
          | primtype array[a2] {$$ = new parse_tree("arraytype", 1, $primtype); }
 
 
+/* Function Declarations */
+funcDecl: type identifier[i1] '(' formals[f1] ')' stmtblock[s1] {$$ = new parse_tree("functiondecl", 4, $type, $i1, $f1, $s1); }
+        | void identifier[i2] '(' formals[f2] ')' stmtblock[s2] {$$ = new parse_tree("functiondecl", 4, $void, $i2, $f2, $s2); }
+
+formals: /* empty */ {$$ = new parse_tree("formals"); }
+       | formals[f1] variable[v1] {$f1->add_child($v1); $$ = $1; }
+       | formals[f2] variable[v2] ',' {$f2->add_child($v2); $$ = $1; }
+
+varDeclStar: /* empty */ {$$ = new parse_tree("vardecls");}
+           | varDeclStar varDecl {$1->add_child($2); $$ = $1; }
+
+stmtStar: /* empty */ {$$ = new parse_tree("stmts");}
+        | stmtStar stmt {$1->add_child($2); $$ = $1; }
+
+stmtblock: '{' varDeclStar[v] stmtStar[s] '}' {$$ = new parse_tree("stmtblock", 2, $v, $s);}
+
+stmt: breakStmt
+
+breakStmt: break ';' {$$ = new parse_tree("break", 1, $break); }
 
 /* TERMINAL PRODUCTIONS */
-
 typeidentifier: T_TYPEIDENTIFIER { $$ = new parse_tree(mytok); }
 identifier: T_IDENTIFIER { $$ = new parse_tree(mytok); }
 string: T_STRING { $$ = new parse_tree(mytok); }
-// intlit: T_INTLITERAL { $$ = new parse_tree(mytok); }
-// double: T_DOUBLE { $$ = new parse_tree(mytok); }
-// bool: T_BOOL { $$ = new parse_tree(mytok); }
+int: T_INT { $$ = new parse_tree(mytok); }
+double: T_DOUBLE { $$ = new parse_tree(mytok); }
+bool: T_BOOL { $$ = new parse_tree(mytok); }
 array: T_ARRAY { $$ = new parse_tree(mytok); }
+void: T_VOID { $$ = new parse_tree(mytok); }
+break: T_BREAK { $$ = new parse_tree(mytok); }
 
 %%

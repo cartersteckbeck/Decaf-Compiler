@@ -9,7 +9,7 @@ int retcon = 0;
 int bracket_start;
 %}
 
-FOLLOW [[:space:]]*[A-Za-z][A-Za-z0-9_]*
+FOLLOW [[:space:]]*[A-Za-z][A-Za-z0-9_]*|[[:space:]]*[\[\]]
 DBLLITERAL [0-9]+\.[0-9]*([E|e][\+]?[0-9]+)?
 INTLITERAL [0-9]*|0[xX][a-fA-F0-9]+
 IDENTIFIER [A-Za-z][A-Za-z0-9_]*

@@ -3,23 +3,25 @@ foo bar;
 bar baz;
 string g;
 thing[] one;
+int three;
+bool[] hello;
 // thing
 // []
 // []  // discover bug in my lexer where the return type on this token was wrong.
 // two; // (fixed)
-//
-// /* added just the very smallest possible function declarations
-// string foo() {}
-// void print() {}
-// int fact(int n) {}
-// int fact_iter(int n, int k) {}
-//
-// /* expanded stmtblock to include var decls and statement, just break for now */
-// int fact(int n) {
-//   int x;
-//   foo y;
-//   break;
-// }
+
+/* added just the very smallest possible function declarations */
+string foo() {}
+void print() {}
+int fact(int n) {}
+int fact_iter(int n, int k) {}
+
+/* expanded stmtblock to include var decls and statement, just break for now */
+int fact(int n) {
+  int x;
+  foo y;
+  break;
+}
 //
 // /* Added expressions, but missing some base cases
 //    Here just identifiers and constants */
