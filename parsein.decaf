@@ -29,9 +29,14 @@ int fact(int n)
 {
   int x;
   foo y;
+  a + b;
+  a.b;
   // x = x + 1;
-  y = x * x - y * y;
+  x = y || z || x;
+  // y = x * x - y * y;
+  // a.b.c = c;
   // truthy.b[!b + c && c] = a.y[b] / 8 < !b + c || d * - d;
+  // truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
 
 }
 //
