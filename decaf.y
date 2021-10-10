@@ -114,9 +114,75 @@ stmtStar: /* empty */ {$$ = new parse_tree("stmts");}
 
 stmtblock: '{' varDeclStar[v] stmtStar[s] '}' {$$ = new parse_tree("stmtblock", 2, $v, $s);}
 
-stmt: breakStmt
+stmt: break ';' {$$ = new parse_tree("break", 1, $break); }
+    // | ';'
+    | expr ';'
 
-breakStmt: break ';' {$$ = new parse_tree("break", 1, $break); }
+/* Expressions */
+
+Lval: identifier
+    | expr '.' identifier[i]  {$$ = new parse_tree("fieldaccess", 2, $expr, $i);}
+    | expr[a] '[' expr[b] ']' {$$ = new parse_tree("aref", 2, $a, $b);}
+
+expr: Lval '=' expr1 {$$ = new parse_tree("binop", 3, $Lval, new parse_tree("="), $expr1);}
+
+expr1: expr2
+     | expr1[inner] or expr2 {$$ = new parse_tree("binop", 3, $inner, $or, $expr2);}
+
+expr2: expr3
+     | expr2[inner] and expr3 {$$ = new parse_tree("binop", 3, $inner, $and, $expr3);}
+
+expr3: expr4
+     | expr3[inner] eq expr4 {$$ = new parse_tree("binop", 3, $inner, $eq, $expr4);}
+     | expr3[inner] neq expr4 {$$ = new parse_tree("binop", 3, $inner, $neq, $expr4);}
+
+expr4: expr5
+     | expr4[inner] '<' expr5 {$$ = new parse_tree("binop", 3, $inner, new parse_tree("<"), $expr5);}
+     | expr4[inner] '>' expr5 {$$ = new parse_tree("binop", 3, $inner, new parse_tree(">"), $expr5);}
+     | expr4[inner] le expr5 {$$ = new parse_tree("binop", 3, $inner, $le, $expr5);}
+     | expr4[inner] ge expr5 {$$ = new parse_tree("binop", 3, $inner, $ge, $expr5);}
+
+expr5: expr6
+     | expr5[inner] '+' expr6 {$$ = new parse_tree("binop", 3, $inner, new parse_tree("+"), $expr6);}
+     | expr5[inner] '-' expr6 {$$ = new parse_tree("binop", 3, $inner, new parse_tree("-"), $expr6);}
+
+expr6: expr7
+     | expr6[inner] '*' expr7 {$$ = new parse_tree("binop", 3, $inner, new parse_tree("*"), $expr7);}
+     | expr6[inner] '/' expr7 {$$ = new parse_tree("binop", 3, $inner, new parse_tree("/"), $expr7);}
+     | expr6[inner] '%' expr7 {$$ = new parse_tree("binop", 3, $inner, new parse_tree("%"), $expr7);}
+
+expr7: expr8
+     | '!' expr8 {$$ = new parse_tree("uop", 2, new parse_tree("!"), $expr8);}
+     | '-' expr8 {$$ = new parse_tree("uop", 2, new parse_tree("-"), $expr8);}
+
+expr8: expr9
+| expr8[inner] '[' expr9 ']' {$$ = new parse_tree("aref", 2, $inner, $expr9);}
+| expr8[inner] '.' expr9 {$$ = new parse_tree("fieldaccess", 2, $inner, $expr9);}
+
+expr9: identifier
+     | constant
+     | this
+     | call
+     | '(' expr ')' { $$ = $expr; }
+     | readint '(' ')'
+     | readline '(' ')'
+     | new '(' identifier ')'
+     | newarray '(' expr ',' type ')'
+
+call: identifier '(' actuals ')'
+    | expr '.' identifier '(' actuals ')'
+
+actuals: /* empty */
+       | actuals expr
+       | actuals expr ','
+
+constant: intlit
+        | dbllit
+        | boollit
+        | stringlit
+        | null
+
+
 
 /* TERMINAL PRODUCTIONS */
 typeidentifier: T_TYPEIDENTIFIER { $$ = new parse_tree(mytok); }
@@ -128,5 +194,21 @@ bool: T_BOOL { $$ = new parse_tree(mytok); }
 array: T_ARRAY { $$ = new parse_tree(mytok); }
 void: T_VOID { $$ = new parse_tree(mytok); }
 break: T_BREAK { $$ = new parse_tree(mytok); }
+this: T_THIS { $$ = new parse_tree(mytok); }
+le: T_LE { $$ = new parse_tree(mytok); }
+ge: T_GE { $$ = new parse_tree(mytok); }
+eq: T_EQ { $$ = new parse_tree(mytok); }
+neq: T_NEQ { $$ = new parse_tree(mytok); }
+and: T_AND { $$ = new parse_tree(mytok); }
+or: T_OR { $$ = new parse_tree(mytok); }
+readint: T_READINTEGER { $$ = new parse_tree(mytok); }
+new: T_NEW { $$ = new parse_tree(mytok); }
+newarray: T_NEWARRAY { $$ = new parse_tree(mytok); }
+intlit: T_INTLITERAL { $$ = new parse_tree(mytok); }
+dbllit: T_DBLLITERAL { $$ = new parse_tree(mytok); }
+boollit: T_BOOLLITERAL { $$ = new parse_tree(mytok); }
+stringlit: T_STRINGLITERAL { $$ = new parse_tree(mytok); }
+null: T_NULL { $$ = new parse_tree(mytok); }
+readline: T_READLINE { $$ = new parse_tree(mytok); }
 
 %%
