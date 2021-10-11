@@ -1,73 +1,76 @@
-// /* starting with variable declarations, the easiest */
-// foo bar;
-// bar baz;
-// string g;
-// thing[] one;
-// int three;
-// bool[] hello;
-// // thing
-// // []
-// // []  // discover bug in my lexer where the return type on this token was wrong.
-// // two; // (fixed)
-//
-// /* added just the very smallest possible function declarations */
-// string foo() {}
-// void print() {}
-// int fact(int n) {}
-// int fact_iter(int n, int k) {}
-//
-// /* expanded stmtblock to include var decls and statement, just break for now */
-// int fact(int n) {
-//   int x;
-//   foo y;
-//   break;
-// }
-//
-// /* Added expressions, but missing some base cases
-//    Here just identifiers and constants */
+/* starting with variable declarations, the easiest */
+foo bar;
+bar baz;
+string g;
+thing[] one;
+int three;
+bool[] hello;
+// thing
+// []
+// []  // discover bug in my lexer where the return type on this token was wrong.
+// two; // (fixed)
+
+/* added just the very smallest possible function declarations */
+string foo() {}
+void print() {}
+int fact(int n) {}
+int fact_iter(int n, int k) {}
+
+/* expanded stmtblock to include var decls and statement, just break for now */
+int fact(int n) {
+  int x;
+  foo y;
+  break;
+}
+
+/* Added expressions, but missing some base cases
+   Here just identifiers and constants */
 int fact(int n)
 {
   int x;
   foo y;
   a + b;
   a.b;
-  // x = x + 1;
-  x = y || z || x;
-  // y = x * x - y * y;
-  // a.b.c = c;
-  // truthy.b[!b + c && c] = a.y[b] / 8 < !b + c || d * - d;
-  // truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
+  x = x + 1;
+  x = x && y + z;
+  y || z || x;
+  y = x * x - y * y;
+  a.b[a.b && c] = c;
+  a[b[c]] = a.b;
+  q.y[!b && a];
+  truthy.b[!b + c && c] = a.y[b] / 8 < !b + c || d * - d;
+  truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
 
 }
 //
 // /* Commented-out because it shouldn't parse. assignment and Relational
 //  operators do not associate in decaf. */
-// /*
-// void shouldnotparse()
-// {
-//    a = b = c;
-//    x = a < b < c;
-//    y = a == b != c;
-// }
-// */
+/*
+void shouldnotparse()
+{
+   a = b = c = does = parse = tho;
+   x = a < b < c;
+   y = a == b != c;
+}
+*/
 //
-// /* These are okay because of parentheses. We will deal with them
-//    during semantic analysis. */
-// void shouldparse()
-// {
-//    x = a < b == c;
-//    x = (a < b) < c;
-//    y = (a==b) != c;
-// }
-//
-// /* Finally getting into the stuff we learned in the iffylab */
-// void matchedif()
-// {
-//    if (x == 4)
-//       return 8;
-//    else
-//       Print(x - 2); // also added Print :-)
-// }
+/* These are okay because of parentheses. We will deal with them
+   during semantic analysis. */
+void shouldparse()
+{
+   x = a < b == c;
+   x = (a < b) < c;
+   y = (a==b) != c;
+}
+
+/* Finally getting into the stuff we learned in the iffylab */
+void matchedif()
+{
+   if (x == 4)
+      return 8;
+   else
+      Print(x - 2); // also added Print :-)
+}
 //
 // /* Added unmatched if */
 // int fact(int n)

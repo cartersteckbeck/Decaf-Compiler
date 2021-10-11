@@ -387,8 +387,8 @@ static yyconst flex_int16_t yy_acclist[493] =
 
        55,16422,   37,   54,   55,16422,   37,   54,   55,16422,
        54,   55,   43,   55,   42,   55,   47,   55,   46,   55,
-       47,   55,   51,   55,   49,   55,   50,   55,   32,   55,
-       31,   32,   55,   30,   31,   55,   32,   33,   55,   26,
+       47,   55,   51,   55,   49,   55,   50,   55,   33,   55,
+       31,   33,   55,   30,   31,   55,   32,   33,   55,   26,
        27,   44,   41,   39,   40,   24,   23,   25,   37,16422,
        37, 8230,16422,   37, 8230,16422,   37, 8230,16422,   37,
      8230,16422,   37, 8230,16422,   37, 8230,16422,   37, 8230,
@@ -1252,12 +1252,12 @@ YY_RULE_SETUP
 case 32:
 YY_RULE_SETUP
 #line 56 "decaf.l"
-{BEGIN(INITIAL); yyless(0); return make_token('[', start_line); }
+{BEGIN(INITIAL); return make_token(T_ARRAY, start_line);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 57 "decaf.l"
-{BEGIN(INITIAL); return make_token(T_ARRAY, start_line);}
+{BEGIN(INITIAL); yyless(0); return make_token('[', start_line); }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP

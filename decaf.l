@@ -53,8 +53,8 @@ ReadLine {return make_token(T_READLINE, current_line);}
 \[ {BEGIN(ARRAY); start_line = current_line;}
 <ARRAY>\n {current_line++;}
 <ARRAY>[[:space:]] {}
-<ARRAY>. {BEGIN(INITIAL); yyless(0); return make_token('[', start_line); }
 <ARRAY>\] {BEGIN(INITIAL); return make_token(T_ARRAY, start_line);}
+<ARRAY>. {BEGIN(INITIAL); yyless(0); return make_token('[', start_line); }
 
 [\+\-\*\/\%\<\>\=\!\;\,\.\[\]\(\)\{\}\\] { return make_token(yytext[0], current_line); }
 

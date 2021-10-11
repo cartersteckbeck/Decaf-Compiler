@@ -120,12 +120,8 @@ stmt: break ';' {$$ = new parse_tree("break", 1, $break); }
 
 /* Expressions */
 
-Lval: identifier
-    | expr1 '.' identifier[i]  {$$ = new parse_tree("fieldaccess", 2, $expr1, $i);}
-    | expr1[a] '[' expr1[b] ']' {$$ = new parse_tree("aref", 2, $a, $b);}
-
 expr: expr1
-    | Lval sceq expr1 {$$ = new parse_tree("binop", 3, $Lval, $sceq, $expr1);}
+    | expr1[a] sceq expr1[b] {$$ = new parse_tree("binop", 3, $a, $sceq, $b);}
 
 expr1: expr2
      | expr1[inner] or expr2 {$$ = new parse_tree("binop", 3, $inner, $or, $expr2);
@@ -159,25 +155,25 @@ expr7: expr8
      | scminus expr7[inner] {$$ = new parse_tree("uop", 2, $scminus, $inner);}
 
 expr8: expr9
-     | expr8[inner] '[' expr8[inner2] ']' {$$ = new parse_tree("aref", 2, $inner, $inner2);}
-     | expr8[inner] '.' expr8[inner2] {$$ = new parse_tree("fieldaccess", 2, $inner, $inner2);}
+     | expr8[inner] '[' expr1[inner2] ']' {$$ = new parse_tree("aref", 2, $inner, $inner2);}
+     | expr8[inner] '.' expr9[inner2] {$$ = new parse_tree("fieldaccess", 2, $inner, $inner2);}
 
 expr9: identifier
      | constant
-     | this
-     | call
-     | '(' expr ')' { $$ = $expr; }
-     | readint '(' ')'
-     | readline '(' ')'
-     | new '(' identifier ')'
-     | newarray '(' expr ',' type ')'
-
-call: identifier '(' actuals ')'
-    | expr '.' identifier '(' actuals ')'
-
-actuals: /* empty */
-       | actuals expr
-       | actuals expr ','
+//      | this
+//      | call
+      | '(' expr ')' { $$ = $expr; }
+//      | readint '(' ')'
+//      | readline '(' ')'
+//      | new '(' identifier ')'
+//      | newarray '(' expr ',' type ')'
+//
+// call: identifier '(' actuals ')'
+//     | expr '.' identifier '(' actuals ')'
+//
+// actuals: /* empty */
+//        | actuals expr
+//        | actuals expr ','
 
 constant: intlit
         | dbllit
@@ -199,8 +195,8 @@ break: T_BREAK { $$ = new parse_tree(mytok); }
 this: T_THIS { $$ = new parse_tree(mytok); }
 le: T_LE { $$ = new parse_tree(mytok); }
 ge: T_GE { $$ = new parse_tree(mytok); }
-eq: T_EQ { $$ = new parse_tree(mytok); }
-neq: T_NEQ { $$ = new parse_tree(mytok); }
+eq: T_EQ { $$ = new parse_tree("EQ"); }
+neq: T_NEQ { $$ = new parse_tree("NEQ"); }
 and: T_AND { $$ = new parse_tree("AND"); }
 or: T_OR { $$ = new parse_tree("OR"); }
 readint: T_READINTEGER { $$ = new parse_tree(mytok); }
