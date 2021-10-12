@@ -66,21 +66,21 @@ void shouldparse()
 /* Finally getting into the stuff we learned in the iffylab */
 void matchedif()
 {
-   if (x == 4)
+   if (x = 4)
       return 8;
    else
-      Print(x - 2); // also added Print :-)
+      Print(x = 2, y + 1); // also added Print :-)
 }
-//
-// /* Added unmatched if */
-// int fact(int n)
-// {
-//   // getting close to having a real function parseable!
-//   if (n == 0) // unmatched if
-//     return 1;
-//   return n * fact * (n - 1); // baloney, because I still don't
-//                              // have Call implemented
-// }
+
+/* Added unmatched if */
+int fact(int n)
+{
+  // getting close to having a real function parseable!
+  if (n == 0) // unmatched if
+    return 1;
+  return n * fact * (n - 1); // baloney, because I still don't
+                             // have Call implemented
+}
 //
 // /* added matched and unmatched while.
 //    Now I can parse a function that does something. */

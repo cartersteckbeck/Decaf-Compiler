@@ -114,19 +114,51 @@ stmtStar: /* empty */ {$$ = new parse_tree("stmts");}
 
 stmtblock: '{' varDeclStar[v] stmtStar[s] '}' {$$ = new parse_tree("stmtblock", 2, $v, $s);}
 
-stmt: break ';' {$$ = new parse_tree("break", 1, $break); }
-    | expr ';' {std::cout << "expr eval" << std::endl;}
-    | ';' {$$ = new parse_tree("nullstmt"); }
+/* statements */
+stmt: matched_stmt | unmatched_stmt
 
+unmatched_stmt: unmatched_if
+              | unmatched_while
+
+matched_stmt: break ';' {$$ = new parse_tree("break", 1, $break); }
+            | expr ';'
+            | ';' {$$ = new parse_tree("nullstmt"); }
+            | print_stmt ';'
+            | matched_if
+            | return_stmt ';'
+            | matched_while
+
+
+print_stmt: print '(' print_actuals ')' {$$ = new parse_tree("print", 2, $print, $print_actuals); }
+
+return_stmt: return {$$ = new parse_tree("return", 1, $return); }
+           | return expr {$$ = new parse_tree("return", 2, $return, $expr); }
+
+matched_if: common_if matched_stmt[s1] else matched_stmt[s2] {$$->add_child($s1);
+                                                              $$->add_child($s2);
+                                                              $$ = $common_if;}
+
+unmatched_if: common_if matched_stmt[s1] else unmatched_stmt[s2] {$$->add_child($s1);
+                                                                  $$->add_child($s2);
+                                                                  $$ = $common_if;}
+            | common_if stmt {$$->add_child($stmt);
+                              $$->add_child(nullptr);
+                              $$ = $common_if;}
+
+common_if: "if" '(' expr ')' {$$ = new parse_tree("if", 1, $expr); }
+
+matched_while:
+unmatched_while:
+common_while:
 /* Expressions */
 
 expr: expr1
     | expr1[a] sceq expr1[b] {$$ = new parse_tree("binop", 3, $a, $sceq, $b);}
 
 expr1: expr2
-     | expr1[inner] or expr2 {$$ = new parse_tree("binop", 3, $inner, $or, $expr2);
-                              std::cout << "left id " << $inner->to_string() <<
-                              "right id " << $expr2->to_string() << std::endl;}
+     | expr1[inner] or expr2 {$$ = new parse_tree("binop", 3, $inner, $or, $expr2);}
+     /* std::cout << "left id " << $inner->to_string() <<
+     "right id " << $expr2->to_string() << std::endl; */
 
 expr2: expr3
      | expr2[inner] and expr3 {$$ = new parse_tree("binop", 3, $inner, $and, $expr3);}
@@ -171,9 +203,12 @@ expr9: identifier
 // call: identifier '(' actuals ')'
 //     | expr '.' identifier '(' actuals ')'
 //
-// actuals: /* empty */
-//        | actuals expr
-//        | actuals expr ','
+actuals: /* empty */ {$$ = new parse_tree("actuals");}
+       | actuals expr {$1->add_child($2); $$ = $1;}
+       | actuals ',' expr {$1->add_child($expr); $$ = $1;}
+
+print_actuals: expr {$$ = new parse_tree("actuals", 1, $expr);}
+             | print_actuals ',' expr {$1->add_child($2); $$ = $1;}
 
 constant: intlit
         | dbllit
@@ -208,6 +243,10 @@ boollit: T_BOOLLITERAL { $$ = new parse_tree(mytok); }
 stringlit: T_STRINGLITERAL { $$ = new parse_tree(mytok); }
 null: T_NULL { $$ = new parse_tree(mytok); }
 readline: T_READLINE { $$ = new parse_tree(mytok); }
+if: T_IF { $$ = new parse_tree(mytok); }
+else: T_ELSE { $$ = new parse_tree(mytok); }
+print: T_PRINT { $$ = new parse_tree(mytok); }
+return: T_RETURN { $$ = new parse_tree(mytok); }
 
 /* single character terminals */
 scplus: '+' { $$ = new parse_tree(mytok); }
