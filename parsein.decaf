@@ -58,42 +58,43 @@ void shouldnotparse()
    during semantic analysis. */
 void shouldparse()
 {
-   x = a < b == c;
-   x = (a < b) < c;
-   y = (a==b) != c;
+   while (a > b)
+       b = b + 1;
 }
 
 /* Finally getting into the stuff we learned in the iffylab */
 void matchedif()
 {
-   if (x = 4)
-      return 8;
-   else
-      Print(x = 2, y + 1); // also added Print :-)
+   if (a = b){
+      b = c;
+   }
+   else{
+      c = b;
+   }
 }
 
 /* Added unmatched if */
 int fact(int n)
 {
   // getting close to having a real function parseable!
-  if (n == 0) // unmatched if
-    return 1;
-  return n * fact * (n - 1); // baloney, because I still don't
+   if (n == 0) // unmatched if
+   return 1;
+   return n * fact * (n - 1); // baloney, because I still don't
                              // have Call implemented
 }
 //
 // /* added matched and unmatched while.
 //    Now I can parse a function that does something. */
-// int fact(int n)
-// {
-//    int result;
-//    result = 1;
-//    while (n > 1) {
-//       result = result * n;
-//       n = n - 1;
-//    }
-//    return result;
-// }
+int fact(int n)
+{
+   int result;
+   result = 1;
+   while (n > 1) {
+      result = result * n;
+      n = n - 1;
+   }
+   return result;
+}
 //
 // /* Let's see how we do with matching else properly */
 // void fun()

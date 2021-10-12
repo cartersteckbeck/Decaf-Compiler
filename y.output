@@ -1,5 +1,6 @@
 Nonterminals useless in grammar
 
+   actuals
    this
    readint
    new
@@ -26,7 +27,6 @@ Terminals unused in grammar
    "extends"
    "implements"
    "for"
-   "while"
    "New"
    "NewArray"
    "ReadInteger"
@@ -36,44 +36,44 @@ Terminals unused in grammar
 
 Rules useless in grammar
 
-  114 this: "this"
+  130 actuals: %empty
+  131        | actuals expr
+  132        | actuals ',' expr
 
-  115 readint: "ReadInteger"
+  133 this: "this"
 
-  116 new: "New"
+  134 readint: "ReadInteger"
 
-  117 newarray: "NewArray"
+  135 new: "New"
 
-  118 readline: "ReadLine"
+  136 newarray: "NewArray"
 
-  119 if: "if"
+  137 readline: "ReadLine"
 
-  120 sccolon: ';'
+  138 if: "if"
 
-  121 sccomma: ','
+  139 sccolon: ';'
 
-  122 scperiod: '.'
+  140 sccomma: ','
 
-  123 sclbracket: '['
+  141 scperiod: '.'
 
-  124 scrbracket: ']'
+  142 sclbracket: '['
 
-  125 sclparen: '('
+  143 scrbracket: ']'
 
-  126 scrparen: ')'
+  144 sclparen: '('
 
-  127 sclcurly: '{'
+  145 scrparen: ')'
 
-  128 scrcurly: '}'
+  146 sclcurly: '{'
 
-  129 scbackslash: '\\'
+  147 scrcurly: '}'
+
+  148 scbackslash: '\\'
 
 
-State 74 conflicts: 1 shift/reduce
-State 141 conflicts: 1 shift/reduce
-State 142 conflicts: 1 shift/reduce
-State 143 conflicts: 1 shift/reduce
-State 144 conflicts: 1 shift/reduce
+State 191 conflicts: 3 reduce/reduce
 
 
 Grammar
@@ -121,203 +121,226 @@ Grammar
 
    27 stmtblock: '{' varDeclStar stmtStar '}'
 
-   28 stmt: matched_stmt
-   29     | unmatched_stmt
+   28 print_stmt: print '(' print_actuals ')'
 
-   30 unmatched_stmt: unmatched_if
+   29 return_stmt: return
+   30            | return expr
 
-   31 matched_stmt: break ';'
-   32             | expr ';'
-   33             | ';'
-   34             | print_stmt ';'
-   35             | matched_if
-   36             | return_stmt ';'
+   31 stmt: matched_stmt
+   32     | unmatched_stmt
 
-   37 print_stmt: print '(' actuals ')'
+   33 matched_stmt: break ';'
+   34             | expr ';'
+   35             | ';'
+   36             | print_stmt ';'
+   37             | return_stmt ';'
+   38             | matched_if
+   39             | matched_while
 
-   38 return_stmt: return
-   39            | return expr
+   40 unmatched_stmt: unmatched_if
+   41               | unmatched_while
 
-   40 matched_if: common_if matched_stmt else matched_stmt
+   42 matched_stmtStar: %empty
+   43                 | matched_stmtStar matched_stmt
 
-   41 unmatched_if: common_if matched_stmt else unmatched_stmt
-   42             | common_if stmt
+   44 unmatched_stmtStar: %empty
+   45                   | unmatched_stmtStar unmatched_stmt
 
-   43 common_if: "if" '(' expr ')'
+   46 matched_stmtBlock: varDeclStar matched_stmtStar
 
-   44 expr: expr1
-   45     | expr1 sceq expr1
+   47 unmatched_stmtBlock: varDeclStar unmatched_stmtStar
 
-   46 expr1: expr2
-   47      | expr1 or expr2
+   48 common_if: "if" '(' expr ')'
 
-   48 expr2: expr3
-   49      | expr2 and expr3
+   49 matched_if: common_if '{' matched_stmtBlock '}' else '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock '}' else matched_stmt
+   51           | common_if matched_stmt else '{' matched_stmtBlock '}'
+   52           | common_if matched_stmt else matched_stmt
 
-   50 expr3: expr4
-   51      | expr3 eq expr4
-   52      | expr3 neq expr4
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock '}' else unmatched_stmt
+   55             | common_if '{' matched_stmtBlock '}'
+   56             | common_if matched_stmt
 
-   53 expr4: expr5
-   54      | expr4 sclt expr5
-   55      | expr4 scgt expr5
-   56      | expr4 le expr5
-   57      | expr4 ge expr5
+   57 common_while: "while" '(' expr ')'
 
-   58 expr5: expr6
-   59      | expr5 scplus expr6
-   60      | expr5 scminus expr6
+   58 matched_while: common_while '{' matched_stmtBlock '}'
+   59              | common_while matched_stmt
 
-   61 expr6: expr7
-   62      | expr6 sctimes expr7
-   63      | expr6 scdiv expr7
-   64      | expr6 scmod expr7
+   60 unmatched_while: common_while unmatched_stmt
 
-   65 expr7: expr8
-   66      | scneq expr7
-   67      | scminus expr7
+   61 expr: expr1
+   62     | expr1 sceq expr1
 
-   68 expr8: expr9
-   69      | expr8 '[' expr1 ']'
-   70      | expr8 '.' expr9
+   63 expr1: expr2
+   64      | expr1 or expr2
 
-   71 expr9: identifier
-   72      | constant
-   73      | '(' expr ')'
+   65 expr2: expr3
+   66      | expr2 and expr3
 
-   74 actuals: %empty
-   75        | actuals expr
-   76        | actuals ',' expr
+   67 expr3: expr4
+   68      | expr3 eq expr4
+   69      | expr3 neq expr4
 
-   77 constant: intlit
-   78         | dbllit
-   79         | boollit
-   80         | stringlit
-   81         | null
+   70 expr4: expr5
+   71      | expr4 sclt expr5
+   72      | expr4 scgt expr5
+   73      | expr4 le expr5
+   74      | expr4 ge expr5
 
-   82 typeidentifier: T_TYPEIDENTIFIER
+   75 expr5: expr6
+   76      | expr5 scplus expr6
+   77      | expr5 scminus expr6
 
-   83 identifier: T_IDENTIFIER
+   78 expr6: expr7
+   79      | expr6 sctimes expr7
+   80      | expr6 scdiv expr7
+   81      | expr6 scmod expr7
 
-   84 string: "string"
+   82 expr7: expr8
+   83      | scneq expr7
+   84      | scminus expr7
 
-   85 int: "int"
+   85 expr8: expr9
+   86      | expr8 '[' expr1 ']'
+   87      | expr8 '.' expr9
 
-   86 double: "double"
+   88 expr9: identifier
+   89      | constant
+   90      | '(' expr ')'
 
-   87 bool: "bool"
+   91 print_actuals: expr
+   92              | print_actuals ',' expr
 
-   88 array: "[]"
+   93 constant: intlit
+   94         | dbllit
+   95         | boollit
+   96         | stringlit
+   97         | null
 
-   89 void: "void"
+   98 typeidentifier: T_TYPEIDENTIFIER
 
-   90 break: "break"
+   99 identifier: T_IDENTIFIER
 
-   91 le: "<="
+  100 string: "string"
 
-   92 ge: ">="
+  101 int: "int"
 
-   93 eq: "=="
+  102 double: "double"
 
-   94 neq: "!="
+  103 bool: "bool"
 
-   95 and: "&&"
+  104 array: "[]"
 
-   96 or: "||"
+  105 void: "void"
 
-   97 intlit: T_INTLITERAL
+  106 break: "break"
 
-   98 dbllit: T_DBLLITERAL
+  107 le: "<="
 
-   99 boollit: T_BOOLLITERAL
+  108 ge: ">="
 
-  100 stringlit: T_STRINGLITERAL
+  109 eq: "=="
 
-  101 null: "null"
+  110 neq: "!="
 
-  102 else: "else"
+  111 and: "&&"
 
-  103 print: "Print"
+  112 or: "||"
 
-  104 return: "return"
+  113 intlit: T_INTLITERAL
 
-  105 scplus: '+'
+  114 dbllit: T_DBLLITERAL
 
-  106 scminus: '-'
+  115 boollit: T_BOOLLITERAL
 
-  107 sctimes: '*'
+  116 stringlit: T_STRINGLITERAL
 
-  108 scdiv: '/'
+  117 null: "null"
 
-  109 scmod: '%'
+  118 else: "else"
 
-  110 sclt: '<'
+  119 print: "Print"
 
-  111 scgt: '>'
+  120 return: "return"
 
-  112 sceq: '='
+  121 scplus: '+'
 
-  113 scneq: '!'
+  122 scminus: '-'
+
+  123 sctimes: '*'
+
+  124 scdiv: '/'
+
+  125 scmod: '%'
+
+  126 sclt: '<'
+
+  127 scgt: '>'
+
+  128 sceq: '='
+
+  129 scneq: '!'
 
 
 Terminals, with rules where they appear
 
 $end (0) 0
-'!' (33) 113
-'%' (37) 109
-'(' (40) 18 19 37 43 73
-')' (41) 18 19 37 43 73
-'*' (42) 107
-'+' (43) 105
-',' (44) 22 76
-'-' (45) 106
-'.' (46) 70
-'/' (47) 108
-';' (59) 6 31 32 33 34 36
-'<' (60) 110
-'=' (61) 112
-'>' (62) 111
-'[' (91) 69
+'!' (33) 129
+'%' (37) 125
+'(' (40) 18 19 28 48 57 90
+')' (41) 18 19 28 48 57 90
+'*' (42) 123
+'+' (43) 121
+',' (44) 22 92
+'-' (45) 122
+'.' (46) 87
+'/' (47) 124
+';' (59) 6 33 34 35 36 37
+'<' (60) 126
+'=' (61) 128
+'>' (62) 127
+'[' (91) 86
 '\\' (92)
-']' (93) 69
-'{' (123) 27
-'}' (125) 27
+']' (93) 86
+'{' (123) 27 49 50 51 53 54 55 58
+'}' (125) 27 49 50 51 53 54 55 58
 error (256)
-"void" (260) 89
-"int" (261) 85
-"double" (262) 86
-"bool" (263) 87
-"string" (264) 84
+"void" (260) 105
+"int" (261) 101
+"double" (262) 102
+"bool" (263) 103
+"string" (264) 100
 "class" (265)
 "interface" (266)
-"null" (267) 101
+"null" (267) 117
 "this" (268)
 "extends" (269)
 "implements" (270)
 "for" (271)
-"while" (272)
-"if" (273) 43
-"else" (274) 102
-"return" (275) 104
-"break" (276) 90
+"while" (272) 57
+"if" (273) 48
+"else" (274) 118
+"return" (275) 120
+"break" (276) 106
 "New" (277)
 "NewArray" (278)
-"Print" (279) 103
+"Print" (279) 119
 "ReadInteger" (280)
 "ReadLine" (281)
-"<=" (282) 91
-">=" (283) 92
-"==" (284) 93
-"!=" (285) 94
-"&&" (286) 95
-"||" (287) 96
-"[]" (288) 88
-T_DBLLITERAL (289) 98
-T_INTLITERAL (290) 97
-T_BOOLLITERAL (291) 99
-T_IDENTIFIER (292) 83
-T_TYPEIDENTIFIER (293) 82
-T_STRINGLITERAL (294) 100
+"<=" (282) 107
+">=" (283) 108
+"==" (284) 109
+"!=" (285) 110
+"&&" (286) 111
+"||" (287) 112
+"[]" (288) 104
+T_DBLLITERAL (289) 114
+T_INTLITERAL (290) 113
+T_BOOLLITERAL (291) 115
+T_IDENTIFIER (292) 99
+T_TYPEIDENTIFIER (293) 98
+T_STRINGLITERAL (294) 116
 
 
 Nonterminals, with rules where they appear
@@ -347,115 +370,129 @@ funcDecl (67)
 formals (68)
     on left: 20 21 22, on right: 18 19 21 22
 varDeclStar (69)
-    on left: 23 24, on right: 24 27
+    on left: 23 24, on right: 24 27 46 47
 stmtStar (70)
     on left: 25 26, on right: 26 27
 stmtblock (71)
     on left: 27, on right: 18 19
-stmt (72)
-    on left: 28 29, on right: 26 42
-unmatched_stmt (73)
-    on left: 30, on right: 29 41
-matched_stmt (74)
-    on left: 31 32 33 34 35 36, on right: 28 40 41
-print_stmt (75)
-    on left: 37, on right: 34
-return_stmt (76)
-    on left: 38 39, on right: 36
-matched_if (77)
-    on left: 40, on right: 35
-unmatched_if (78)
-    on left: 41 42, on right: 30
-common_if (79)
-    on left: 43, on right: 40 41 42
-expr (80)
-    on left: 44 45, on right: 32 39 43 73 75 76
-expr1 (81)
-    on left: 46 47, on right: 44 45 47 69
-expr2 (82)
-    on left: 48 49, on right: 46 47 49
-expr3 (83)
-    on left: 50 51 52, on right: 48 49 51 52
-expr4 (84)
-    on left: 53 54 55 56 57, on right: 50 51 52 54 55 56 57
-expr5 (85)
-    on left: 58 59 60, on right: 53 54 55 56 57 59 60
-expr6 (86)
-    on left: 61 62 63 64, on right: 58 59 60 62 63 64
-expr7 (87)
-    on left: 65 66 67, on right: 61 62 63 64 66 67
-expr8 (88)
-    on left: 68 69 70, on right: 65 69 70
-expr9 (89)
-    on left: 71 72 73, on right: 68 70
-actuals (90)
-    on left: 74 75 76, on right: 37 75 76
-constant (91)
-    on left: 77 78 79 80 81, on right: 72
-typeidentifier (92)
-    on left: 82, on right: 11
-identifier (93)
-    on left: 83, on right: 7 18 19 71
-string (94)
-    on left: 84, on right: 12
-int (95)
-    on left: 85, on right: 13
-double (96)
-    on left: 86, on right: 14
-bool (97)
-    on left: 87, on right: 15
-array (98)
-    on left: 88, on right: 16 17
-void (99)
-    on left: 89, on right: 19
-break (100)
-    on left: 90, on right: 31
-le (101)
-    on left: 91, on right: 56
-ge (102)
-    on left: 92, on right: 57
-eq (103)
-    on left: 93, on right: 51
-neq (104)
-    on left: 94, on right: 52
-and (105)
-    on left: 95, on right: 49
-or (106)
-    on left: 96, on right: 47
-intlit (107)
-    on left: 97, on right: 77
-dbllit (108)
-    on left: 98, on right: 78
-boollit (109)
-    on left: 99, on right: 79
-stringlit (110)
-    on left: 100, on right: 80
-null (111)
-    on left: 101, on right: 81
-else (112)
-    on left: 102, on right: 40 41
-print (113)
-    on left: 103, on right: 37
-return (114)
-    on left: 104, on right: 38 39
-scplus (115)
-    on left: 105, on right: 59
-scminus (116)
-    on left: 106, on right: 60 67
-sctimes (117)
-    on left: 107, on right: 62
-scdiv (118)
-    on left: 108, on right: 63
-scmod (119)
-    on left: 109, on right: 64
-sclt (120)
-    on left: 110, on right: 54
-scgt (121)
-    on left: 111, on right: 55
-sceq (122)
-    on left: 112, on right: 45
-scneq (123)
-    on left: 113, on right: 66
+print_stmt (72)
+    on left: 28, on right: 36
+return_stmt (73)
+    on left: 29 30, on right: 37
+stmt (74)
+    on left: 31 32, on right: 26
+matched_stmt (75)
+    on left: 33 34 35 36 37 38 39, on right: 31 43 50 51 52 56 59
+unmatched_stmt (76)
+    on left: 40 41, on right: 32 45 54 60
+matched_stmtStar (77)
+    on left: 42 43, on right: 43 46
+unmatched_stmtStar (78)
+    on left: 44 45, on right: 45 47
+matched_stmtBlock (79)
+    on left: 46, on right: 49 50 51 53 54 55 58
+unmatched_stmtBlock (80)
+    on left: 47, on right: 53
+common_if (81)
+    on left: 48, on right: 49 50 51 52 53 54 55 56
+matched_if (82)
+    on left: 49 50 51 52, on right: 38
+unmatched_if (83)
+    on left: 53 54 55 56, on right: 40
+common_while (84)
+    on left: 57, on right: 58 59 60
+matched_while (85)
+    on left: 58 59, on right: 39
+unmatched_while (86)
+    on left: 60, on right: 41
+expr (87)
+    on left: 61 62, on right: 30 34 48 57 90 91 92
+expr1 (88)
+    on left: 63 64, on right: 61 62 64 86
+expr2 (89)
+    on left: 65 66, on right: 63 64 66
+expr3 (90)
+    on left: 67 68 69, on right: 65 66 68 69
+expr4 (91)
+    on left: 70 71 72 73 74, on right: 67 68 69 71 72 73 74
+expr5 (92)
+    on left: 75 76 77, on right: 70 71 72 73 74 76 77
+expr6 (93)
+    on left: 78 79 80 81, on right: 75 76 77 79 80 81
+expr7 (94)
+    on left: 82 83 84, on right: 78 79 80 81 83 84
+expr8 (95)
+    on left: 85 86 87, on right: 82 86 87
+expr9 (96)
+    on left: 88 89 90, on right: 85 87
+print_actuals (97)
+    on left: 91 92, on right: 28 92
+constant (98)
+    on left: 93 94 95 96 97, on right: 89
+typeidentifier (99)
+    on left: 98, on right: 11
+identifier (100)
+    on left: 99, on right: 7 18 19 88
+string (101)
+    on left: 100, on right: 12
+int (102)
+    on left: 101, on right: 13
+double (103)
+    on left: 102, on right: 14
+bool (104)
+    on left: 103, on right: 15
+array (105)
+    on left: 104, on right: 16 17
+void (106)
+    on left: 105, on right: 19
+break (107)
+    on left: 106, on right: 33
+le (108)
+    on left: 107, on right: 73
+ge (109)
+    on left: 108, on right: 74
+eq (110)
+    on left: 109, on right: 68
+neq (111)
+    on left: 110, on right: 69
+and (112)
+    on left: 111, on right: 66
+or (113)
+    on left: 112, on right: 64
+intlit (114)
+    on left: 113, on right: 93
+dbllit (115)
+    on left: 114, on right: 94
+boollit (116)
+    on left: 115, on right: 95
+stringlit (117)
+    on left: 116, on right: 96
+null (118)
+    on left: 117, on right: 97
+else (119)
+    on left: 118, on right: 49 50 51 52 53 54
+print (120)
+    on left: 119, on right: 28
+return (121)
+    on left: 120, on right: 29 30
+scplus (122)
+    on left: 121, on right: 76
+scminus (123)
+    on left: 122, on right: 77 84
+sctimes (124)
+    on left: 123, on right: 79
+scdiv (125)
+    on left: 124, on right: 80
+scmod (126)
+    on left: 125, on right: 81
+sclt (127)
+    on left: 126, on right: 71
+scgt (128)
+    on left: 127, on right: 72
+sceq (129)
+    on left: 128, on right: 62
+scneq (130)
+    on left: 129, on right: 83
 
 
 State 0
@@ -522,44 +559,44 @@ State 4
 
 State 5
 
-   89 void: "void" .
+  105 void: "void" .
 
-    $default  reduce using rule 89 (void)
+    $default  reduce using rule 105 (void)
 
 
 State 6
 
-   85 int: "int" .
+  101 int: "int" .
 
-    $default  reduce using rule 85 (int)
+    $default  reduce using rule 101 (int)
 
 
 State 7
 
-   86 double: "double" .
+  102 double: "double" .
 
-    $default  reduce using rule 86 (double)
+    $default  reduce using rule 102 (double)
 
 
 State 8
 
-   87 bool: "bool" .
+  103 bool: "bool" .
 
-    $default  reduce using rule 87 (bool)
+    $default  reduce using rule 103 (bool)
 
 
 State 9
 
-   84 string: "string" .
+  100 string: "string" .
 
-    $default  reduce using rule 84 (string)
+    $default  reduce using rule 100 (string)
 
 
 State 10
 
-   82 typeidentifier: T_TYPEIDENTIFIER .
+   98 typeidentifier: T_TYPEIDENTIFIER .
 
-    $default  reduce using rule 82 (typeidentifier)
+    $default  reduce using rule 98 (typeidentifier)
 
 
 State 11
@@ -677,9 +714,9 @@ State 24
 
 State 25
 
-   83 identifier: T_IDENTIFIER .
+   99 identifier: T_IDENTIFIER .
 
-    $default  reduce using rule 83 (identifier)
+    $default  reduce using rule 99 (identifier)
 
 
 State 26
@@ -694,9 +731,9 @@ State 26
 
 State 27
 
-   88 array: "[]" .
+  104 array: "[]" .
 
-    $default  reduce using rule 88 (array)
+    $default  reduce using rule 104 (array)
 
 
 State 28
@@ -902,1668 +939,2519 @@ State 46
    27 stmtblock: '{' varDeclStar stmtStar . '}'
 
     "null"           shift, and go to state 47
-    "if"             shift, and go to state 48
-    "return"         shift, and go to state 49
-    "break"          shift, and go to state 50
-    "Print"          shift, and go to state 51
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    ';'              shift, and go to state 56
-    '('              shift, and go to state 57
-    '}'              shift, and go to state 58
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '}'              shift, and go to state 59
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    stmt            go to state 61
-    unmatched_stmt  go to state 62
-    matched_stmt    go to state 63
-    print_stmt      go to state 64
-    return_stmt     go to state 65
-    matched_if      go to state 66
-    unmatched_if    go to state 67
-    common_if       go to state 68
-    expr            go to state 69
-    expr1           go to state 70
-    expr2           go to state 71
-    expr3           go to state 72
-    expr4           go to state 73
-    expr5           go to state 74
-    expr6           go to state 75
-    expr7           go to state 76
-    expr8           go to state 77
-    expr9           go to state 78
-    constant        go to state 79
-    identifier      go to state 80
-    break           go to state 81
-    intlit          go to state 82
-    dbllit          go to state 83
-    boollit         go to state 84
-    stringlit       go to state 85
-    null            go to state 86
-    print           go to state 87
-    return          go to state 88
-    scminus         go to state 89
-    scneq           go to state 90
+    print_stmt       go to state 62
+    return_stmt      go to state 63
+    stmt             go to state 64
+    matched_stmt     go to state 65
+    unmatched_stmt   go to state 66
+    common_if        go to state 67
+    matched_if       go to state 68
+    unmatched_if     go to state 69
+    common_while     go to state 70
+    matched_while    go to state 71
+    unmatched_while  go to state 72
+    expr             go to state 73
+    expr1            go to state 74
+    expr2            go to state 75
+    expr3            go to state 76
+    expr4            go to state 77
+    expr5            go to state 78
+    expr6            go to state 79
+    expr7            go to state 80
+    expr8            go to state 81
+    expr9            go to state 82
+    constant         go to state 83
+    identifier       go to state 84
+    break            go to state 85
+    intlit           go to state 86
+    dbllit           go to state 87
+    boollit          go to state 88
+    stringlit        go to state 89
+    null             go to state 90
+    print            go to state 91
+    return           go to state 92
+    scminus          go to state 93
+    scneq            go to state 94
 
 
 State 47
 
-  101 null: "null" .
+  117 null: "null" .
 
-    $default  reduce using rule 101 (null)
+    $default  reduce using rule 117 (null)
 
 
 State 48
 
-   43 common_if: "if" . '(' expr ')'
+   57 common_while: "while" . '(' expr ')'
 
-    '('  shift, and go to state 91
+    '('  shift, and go to state 95
 
 
 State 49
 
-  104 return: "return" .
+   48 common_if: "if" . '(' expr ')'
 
-    $default  reduce using rule 104 (return)
+    '('  shift, and go to state 96
 
 
 State 50
 
-   90 break: "break" .
+  120 return: "return" .
 
-    $default  reduce using rule 90 (break)
+    $default  reduce using rule 120 (return)
 
 
 State 51
 
-  103 print: "Print" .
+  106 break: "break" .
 
-    $default  reduce using rule 103 (print)
+    $default  reduce using rule 106 (break)
 
 
 State 52
 
-   98 dbllit: T_DBLLITERAL .
+  119 print: "Print" .
 
-    $default  reduce using rule 98 (dbllit)
+    $default  reduce using rule 119 (print)
 
 
 State 53
 
-   97 intlit: T_INTLITERAL .
+  114 dbllit: T_DBLLITERAL .
 
-    $default  reduce using rule 97 (intlit)
+    $default  reduce using rule 114 (dbllit)
 
 
 State 54
 
-   99 boollit: T_BOOLLITERAL .
+  113 intlit: T_INTLITERAL .
 
-    $default  reduce using rule 99 (boollit)
+    $default  reduce using rule 113 (intlit)
 
 
 State 55
 
-  100 stringlit: T_STRINGLITERAL .
+  115 boollit: T_BOOLLITERAL .
 
-    $default  reduce using rule 100 (stringlit)
+    $default  reduce using rule 115 (boollit)
 
 
 State 56
 
-   33 matched_stmt: ';' .
+  116 stringlit: T_STRINGLITERAL .
 
-    $default  reduce using rule 33 (matched_stmt)
+    $default  reduce using rule 116 (stringlit)
 
 
 State 57
 
-   73 expr9: '(' . expr ')'
+   35 matched_stmt: ';' .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr        go to state 92
-    expr1       go to state 70
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 35 (matched_stmt)
 
 
 State 58
+
+   90 expr9: '(' . expr ')'
+
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr        go to state 97
+    expr1       go to state 74
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
+
+
+State 59
 
    27 stmtblock: '{' varDeclStar stmtStar '}' .
 
     $default  reduce using rule 27 (stmtblock)
 
 
-State 59
-
-  106 scminus: '-' .
-
-    $default  reduce using rule 106 (scminus)
-
-
 State 60
 
-  113 scneq: '!' .
+  122 scminus: '-' .
 
-    $default  reduce using rule 113 (scneq)
+    $default  reduce using rule 122 (scminus)
 
 
 State 61
+
+  129 scneq: '!' .
+
+    $default  reduce using rule 129 (scneq)
+
+
+State 62
+
+   36 matched_stmt: print_stmt . ';'
+
+    ';'  shift, and go to state 98
+
+
+State 63
+
+   37 matched_stmt: return_stmt . ';'
+
+    ';'  shift, and go to state 99
+
+
+State 64
 
    26 stmtStar: stmtStar stmt .
 
     $default  reduce using rule 26 (stmtStar)
 
 
-State 62
-
-   29 stmt: unmatched_stmt .
-
-    $default  reduce using rule 29 (stmt)
-
-
-State 63
-
-   28 stmt: matched_stmt .
-
-    $default  reduce using rule 28 (stmt)
-
-
-State 64
-
-   34 matched_stmt: print_stmt . ';'
-
-    ';'  shift, and go to state 93
-
-
 State 65
 
-   36 matched_stmt: return_stmt . ';'
+   31 stmt: matched_stmt .
 
-    ';'  shift, and go to state 94
+    $default  reduce using rule 31 (stmt)
 
 
 State 66
 
-   35 matched_stmt: matched_if .
+   32 stmt: unmatched_stmt .
 
-    $default  reduce using rule 35 (matched_stmt)
+    $default  reduce using rule 32 (stmt)
 
 
 State 67
 
-   30 unmatched_stmt: unmatched_if .
+   49 matched_if: common_if . '{' matched_stmtBlock '}' else '{' matched_stmtBlock '}'
+   50           | common_if . '{' matched_stmtBlock '}' else matched_stmt
+   51           | common_if . matched_stmt else '{' matched_stmtBlock '}'
+   52           | common_if . matched_stmt else matched_stmt
+   53 unmatched_if: common_if . '{' matched_stmtBlock '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if . '{' matched_stmtBlock '}' else unmatched_stmt
+   55             | common_if . '{' matched_stmtBlock '}'
+   56             | common_if . matched_stmt
 
-    $default  reduce using rule 30 (unmatched_stmt)
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 100
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 101
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
 
 
 State 68
 
-   40 matched_if: common_if . matched_stmt else matched_stmt
-   41 unmatched_if: common_if . matched_stmt else unmatched_stmt
-   42             | common_if . stmt
+   38 matched_stmt: matched_if .
 
-    "null"           shift, and go to state 47
-    "if"             shift, and go to state 48
-    "return"         shift, and go to state 49
-    "break"          shift, and go to state 50
-    "Print"          shift, and go to state 51
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    ';'              shift, and go to state 56
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    stmt            go to state 95
-    unmatched_stmt  go to state 62
-    matched_stmt    go to state 96
-    print_stmt      go to state 64
-    return_stmt     go to state 65
-    matched_if      go to state 66
-    unmatched_if    go to state 67
-    common_if       go to state 68
-    expr            go to state 69
-    expr1           go to state 70
-    expr2           go to state 71
-    expr3           go to state 72
-    expr4           go to state 73
-    expr5           go to state 74
-    expr6           go to state 75
-    expr7           go to state 76
-    expr8           go to state 77
-    expr9           go to state 78
-    constant        go to state 79
-    identifier      go to state 80
-    break           go to state 81
-    intlit          go to state 82
-    dbllit          go to state 83
-    boollit         go to state 84
-    stringlit       go to state 85
-    null            go to state 86
-    print           go to state 87
-    return          go to state 88
-    scminus         go to state 89
-    scneq           go to state 90
+    $default  reduce using rule 38 (matched_stmt)
 
 
 State 69
 
-   32 matched_stmt: expr . ';'
+   40 unmatched_stmt: unmatched_if .
 
-    ';'  shift, and go to state 97
+    $default  reduce using rule 40 (unmatched_stmt)
 
 
 State 70
 
-   44 expr: expr1 .
-   45     | expr1 . sceq expr1
-   47 expr1: expr1 . or expr2
+   58 matched_while: common_while . '{' matched_stmtBlock '}'
+   59              | common_while . matched_stmt
+   60 unmatched_while: common_while . unmatched_stmt
 
-    "||"  shift, and go to state 98
-    '='   shift, and go to state 99
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 104
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    $default  reduce using rule 44 (expr)
-
-    or    go to state 100
-    sceq  go to state 101
+    print_stmt       go to state 62
+    return_stmt      go to state 63
+    matched_stmt     go to state 105
+    unmatched_stmt   go to state 106
+    common_if        go to state 67
+    matched_if       go to state 68
+    unmatched_if     go to state 69
+    common_while     go to state 70
+    matched_while    go to state 71
+    unmatched_while  go to state 72
+    expr             go to state 73
+    expr1            go to state 74
+    expr2            go to state 75
+    expr3            go to state 76
+    expr4            go to state 77
+    expr5            go to state 78
+    expr6            go to state 79
+    expr7            go to state 80
+    expr8            go to state 81
+    expr9            go to state 82
+    constant         go to state 83
+    identifier       go to state 84
+    break            go to state 85
+    intlit           go to state 86
+    dbllit           go to state 87
+    boollit          go to state 88
+    stringlit        go to state 89
+    null             go to state 90
+    print            go to state 91
+    return           go to state 92
+    scminus          go to state 93
+    scneq            go to state 94
 
 
 State 71
 
-   46 expr1: expr2 .
-   49 expr2: expr2 . and expr3
+   39 matched_stmt: matched_while .
 
-    "&&"  shift, and go to state 102
-
-    $default  reduce using rule 46 (expr1)
-
-    and  go to state 103
+    $default  reduce using rule 39 (matched_stmt)
 
 
 State 72
 
-   48 expr2: expr3 .
-   51 expr3: expr3 . eq expr4
-   52      | expr3 . neq expr4
+   41 unmatched_stmt: unmatched_while .
 
-    "=="  shift, and go to state 104
-    "!="  shift, and go to state 105
-
-    $default  reduce using rule 48 (expr2)
-
-    eq   go to state 106
-    neq  go to state 107
+    $default  reduce using rule 41 (unmatched_stmt)
 
 
 State 73
 
-   50 expr3: expr4 .
-   54 expr4: expr4 . sclt expr5
-   55      | expr4 . scgt expr5
-   56      | expr4 . le expr5
-   57      | expr4 . ge expr5
+   34 matched_stmt: expr . ';'
 
-    "<="  shift, and go to state 108
-    ">="  shift, and go to state 109
-    '<'   shift, and go to state 110
-    '>'   shift, and go to state 111
-
-    $default  reduce using rule 50 (expr3)
-
-    le    go to state 112
-    ge    go to state 113
-    sclt  go to state 114
-    scgt  go to state 115
+    ';'  shift, and go to state 107
 
 
 State 74
 
-   53 expr4: expr5 .
-   59 expr5: expr5 . scplus expr6
-   60      | expr5 . scminus expr6
+   61 expr: expr1 .
+   62     | expr1 . sceq expr1
+   64 expr1: expr1 . or expr2
 
-    '+'  shift, and go to state 116
-    '-'  shift, and go to state 59
+    "||"  shift, and go to state 108
+    '='   shift, and go to state 109
 
-    '-'       [reduce using rule 53 (expr4)]
-    $default  reduce using rule 53 (expr4)
+    $default  reduce using rule 61 (expr)
 
-    scplus   go to state 117
-    scminus  go to state 118
+    or    go to state 110
+    sceq  go to state 111
 
 
 State 75
 
-   58 expr5: expr6 .
-   62 expr6: expr6 . sctimes expr7
-   63      | expr6 . scdiv expr7
-   64      | expr6 . scmod expr7
+   63 expr1: expr2 .
+   66 expr2: expr2 . and expr3
 
-    '*'  shift, and go to state 119
-    '/'  shift, and go to state 120
-    '%'  shift, and go to state 121
+    "&&"  shift, and go to state 112
 
-    $default  reduce using rule 58 (expr5)
+    $default  reduce using rule 63 (expr1)
 
-    sctimes  go to state 122
-    scdiv    go to state 123
-    scmod    go to state 124
+    and  go to state 113
 
 
 State 76
 
-   61 expr6: expr7 .
+   65 expr2: expr3 .
+   68 expr3: expr3 . eq expr4
+   69      | expr3 . neq expr4
 
-    $default  reduce using rule 61 (expr6)
+    "=="  shift, and go to state 114
+    "!="  shift, and go to state 115
+
+    $default  reduce using rule 65 (expr2)
+
+    eq   go to state 116
+    neq  go to state 117
 
 
 State 77
 
-   65 expr7: expr8 .
-   69 expr8: expr8 . '[' expr1 ']'
-   70      | expr8 . '.' expr9
+   67 expr3: expr4 .
+   71 expr4: expr4 . sclt expr5
+   72      | expr4 . scgt expr5
+   73      | expr4 . le expr5
+   74      | expr4 . ge expr5
 
-    '['  shift, and go to state 125
-    '.'  shift, and go to state 126
+    "<="  shift, and go to state 118
+    ">="  shift, and go to state 119
+    '<'   shift, and go to state 120
+    '>'   shift, and go to state 121
 
-    $default  reduce using rule 65 (expr7)
+    $default  reduce using rule 67 (expr3)
+
+    le    go to state 122
+    ge    go to state 123
+    sclt  go to state 124
+    scgt  go to state 125
 
 
 State 78
 
-   68 expr8: expr9 .
+   70 expr4: expr5 .
+   76 expr5: expr5 . scplus expr6
+   77      | expr5 . scminus expr6
 
-    $default  reduce using rule 68 (expr8)
+    '+'  shift, and go to state 126
+    '-'  shift, and go to state 60
+
+    $default  reduce using rule 70 (expr4)
+
+    scplus   go to state 127
+    scminus  go to state 128
 
 
 State 79
 
-   72 expr9: constant .
+   75 expr5: expr6 .
+   79 expr6: expr6 . sctimes expr7
+   80      | expr6 . scdiv expr7
+   81      | expr6 . scmod expr7
 
-    $default  reduce using rule 72 (expr9)
+    '*'  shift, and go to state 129
+    '/'  shift, and go to state 130
+    '%'  shift, and go to state 131
+
+    $default  reduce using rule 75 (expr5)
+
+    sctimes  go to state 132
+    scdiv    go to state 133
+    scmod    go to state 134
 
 
 State 80
 
-   71 expr9: identifier .
+   78 expr6: expr7 .
 
-    $default  reduce using rule 71 (expr9)
+    $default  reduce using rule 78 (expr6)
 
 
 State 81
 
-   31 matched_stmt: break . ';'
+   82 expr7: expr8 .
+   86 expr8: expr8 . '[' expr1 ']'
+   87      | expr8 . '.' expr9
 
-    ';'  shift, and go to state 127
+    '['  shift, and go to state 135
+    '.'  shift, and go to state 136
+
+    $default  reduce using rule 82 (expr7)
 
 
 State 82
 
-   77 constant: intlit .
+   85 expr8: expr9 .
 
-    $default  reduce using rule 77 (constant)
+    $default  reduce using rule 85 (expr8)
 
 
 State 83
 
-   78 constant: dbllit .
+   89 expr9: constant .
 
-    $default  reduce using rule 78 (constant)
+    $default  reduce using rule 89 (expr9)
 
 
 State 84
 
-   79 constant: boollit .
+   88 expr9: identifier .
 
-    $default  reduce using rule 79 (constant)
+    $default  reduce using rule 88 (expr9)
 
 
 State 85
 
-   80 constant: stringlit .
+   33 matched_stmt: break . ';'
 
-    $default  reduce using rule 80 (constant)
+    ';'  shift, and go to state 137
 
 
 State 86
 
-   81 constant: null .
+   93 constant: intlit .
 
-    $default  reduce using rule 81 (constant)
+    $default  reduce using rule 93 (constant)
 
 
 State 87
 
-   37 print_stmt: print . '(' actuals ')'
+   94 constant: dbllit .
 
-    '('  shift, and go to state 128
+    $default  reduce using rule 94 (constant)
 
 
 State 88
 
-   38 return_stmt: return .
-   39            | return . expr
+   95 constant: boollit .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    $default  reduce using rule 38 (return_stmt)
-
-    expr        go to state 129
-    expr1       go to state 70
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 95 (constant)
 
 
 State 89
 
-   67 expr7: scminus . expr7
+   96 constant: stringlit .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr7       go to state 130
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 96 (constant)
 
 
 State 90
 
-   66 expr7: scneq . expr7
+   97 constant: null .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr7       go to state 131
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 97 (constant)
 
 
 State 91
 
-   43 common_if: "if" '(' . expr ')'
+   28 print_stmt: print . '(' print_actuals ')'
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr        go to state 132
-    expr1       go to state 70
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    '('  shift, and go to state 138
 
 
 State 92
 
-   73 expr9: '(' expr . ')'
+   29 return_stmt: return .
+   30            | return . expr
 
-    ')'  shift, and go to state 133
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    $default  reduce using rule 29 (return_stmt)
+
+    expr        go to state 139
+    expr1       go to state 74
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 93
 
-   34 matched_stmt: print_stmt ';' .
+   84 expr7: scminus . expr7
 
-    $default  reduce using rule 34 (matched_stmt)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr7       go to state 140
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 94
 
-   36 matched_stmt: return_stmt ';' .
+   83 expr7: scneq . expr7
 
-    $default  reduce using rule 36 (matched_stmt)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr7       go to state 141
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 95
 
-   42 unmatched_if: common_if stmt .
+   57 common_while: "while" '(' . expr ')'
 
-    $default  reduce using rule 42 (unmatched_if)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr        go to state 142
+    expr1       go to state 74
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 96
 
-   28 stmt: matched_stmt .
-   40 matched_if: common_if matched_stmt . else matched_stmt
-   41 unmatched_if: common_if matched_stmt . else unmatched_stmt
+   48 common_if: "if" '(' . expr ')'
 
-    "else"  shift, and go to state 134
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    $default  reduce using rule 28 (stmt)
-
-    else  go to state 135
+    expr        go to state 143
+    expr1       go to state 74
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 97
 
-   32 matched_stmt: expr ';' .
+   90 expr9: '(' expr . ')'
 
-    $default  reduce using rule 32 (matched_stmt)
+    ')'  shift, and go to state 144
 
 
 State 98
 
-   96 or: "||" .
+   36 matched_stmt: print_stmt ';' .
 
-    $default  reduce using rule 96 (or)
+    $default  reduce using rule 36 (matched_stmt)
 
 
 State 99
 
-  112 sceq: '=' .
+   37 matched_stmt: return_stmt ';' .
 
-    $default  reduce using rule 112 (sceq)
+    $default  reduce using rule 37 (matched_stmt)
 
 
 State 100
 
-   47 expr1: expr1 or . expr2
+   49 matched_if: common_if '{' . matched_stmtBlock '}' else '{' matched_stmtBlock '}'
+   50           | common_if '{' . matched_stmtBlock '}' else matched_stmt
+   53 unmatched_if: common_if '{' . matched_stmtBlock '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' . matched_stmtBlock '}' else unmatched_stmt
+   55             | common_if '{' . matched_stmtBlock '}'
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    $default  reduce using rule 23 (varDeclStar)
 
-    expr2       go to state 136
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    varDeclStar        go to state 145
+    matched_stmtBlock  go to state 146
 
 
 State 101
 
-   45 expr: expr1 sceq . expr1
+   51 matched_if: common_if matched_stmt . else '{' matched_stmtBlock '}'
+   52           | common_if matched_stmt . else matched_stmt
+   56 unmatched_if: common_if matched_stmt .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    "else"  shift, and go to state 147
 
-    expr1       go to state 137
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 56 (unmatched_if)
+
+    else  go to state 148
 
 
 State 102
 
-   95 and: "&&" .
+   49 matched_if: common_if . '{' matched_stmtBlock '}' else '{' matched_stmtBlock '}'
+   50           | common_if . '{' matched_stmtBlock '}' else matched_stmt
+   51           | common_if . matched_stmt else '{' matched_stmtBlock '}'
+   52           | common_if . matched_stmt else matched_stmt
 
-    $default  reduce using rule 95 (and)
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 149
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 150
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
 
 
 State 103
 
-   49 expr2: expr2 and . expr3
+   58 matched_while: common_while . '{' matched_stmtBlock '}'
+   59              | common_while . matched_stmt
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 104
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr3       go to state 138
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 105
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
 
 
 State 104
 
-   93 eq: "==" .
+   58 matched_while: common_while '{' . matched_stmtBlock '}'
 
-    $default  reduce using rule 93 (eq)
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar        go to state 145
+    matched_stmtBlock  go to state 151
 
 
 State 105
 
-   94 neq: "!=" .
+   59 matched_while: common_while matched_stmt .
 
-    $default  reduce using rule 94 (neq)
+    $default  reduce using rule 59 (matched_while)
 
 
 State 106
 
-   51 expr3: expr3 eq . expr4
+   60 unmatched_while: common_while unmatched_stmt .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr4       go to state 139
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 60 (unmatched_while)
 
 
 State 107
 
-   52 expr3: expr3 neq . expr4
+   34 matched_stmt: expr ';' .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr4       go to state 140
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 34 (matched_stmt)
 
 
 State 108
 
-   91 le: "<=" .
+  112 or: "||" .
 
-    $default  reduce using rule 91 (le)
+    $default  reduce using rule 112 (or)
 
 
 State 109
 
-   92 ge: ">=" .
+  128 sceq: '=' .
 
-    $default  reduce using rule 92 (ge)
+    $default  reduce using rule 128 (sceq)
 
 
 State 110
 
-  110 sclt: '<' .
+   64 expr1: expr1 or . expr2
 
-    $default  reduce using rule 110 (sclt)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr2       go to state 152
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 111
 
-  111 scgt: '>' .
+   62 expr: expr1 sceq . expr1
 
-    $default  reduce using rule 111 (scgt)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr1       go to state 153
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 112
 
-   56 expr4: expr4 le . expr5
+  111 and: "&&" .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr5       go to state 141
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 111 (and)
 
 
 State 113
 
-   57 expr4: expr4 ge . expr5
+   66 expr2: expr2 and . expr3
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr5       go to state 142
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    expr3       go to state 154
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 114
 
-   54 expr4: expr4 sclt . expr5
+  109 eq: "==" .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr5       go to state 143
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 109 (eq)
 
 
 State 115
 
-   55 expr4: expr4 scgt . expr5
+  110 neq: "!=" .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr5       go to state 144
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 110 (neq)
 
 
 State 116
 
-  105 scplus: '+' .
+   68 expr3: expr3 eq . expr4
 
-    $default  reduce using rule 105 (scplus)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr4       go to state 155
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 117
 
-   59 expr5: expr5 scplus . expr6
+   69 expr3: expr3 neq . expr4
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr6       go to state 145
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    expr4       go to state 156
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 118
 
-   60 expr5: expr5 scminus . expr6
+  107 le: "<=" .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
-
-    expr6       go to state 146
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 107 (le)
 
 
 State 119
 
-  107 sctimes: '*' .
+  108 ge: ">=" .
 
-    $default  reduce using rule 107 (sctimes)
+    $default  reduce using rule 108 (ge)
 
 
 State 120
 
-  108 scdiv: '/' .
+  126 sclt: '<' .
 
-    $default  reduce using rule 108 (scdiv)
+    $default  reduce using rule 126 (sclt)
 
 
 State 121
 
-  109 scmod: '%' .
+  127 scgt: '>' .
 
-    $default  reduce using rule 109 (scmod)
+    $default  reduce using rule 127 (scgt)
 
 
 State 122
 
-   62 expr6: expr6 sctimes . expr7
+   73 expr4: expr4 le . expr5
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr7       go to state 147
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    expr5       go to state 157
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 123
 
-   63 expr6: expr6 scdiv . expr7
+   74 expr4: expr4 ge . expr5
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr7       go to state 148
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    expr5       go to state 158
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 124
 
-   64 expr6: expr6 scmod . expr7
+   71 expr4: expr4 sclt . expr5
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr7       go to state 149
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    expr5       go to state 159
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 125
 
-   69 expr8: expr8 '[' . expr1 ']'
+   72 expr4: expr4 scgt . expr5
 
     "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    expr1       go to state 150
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    expr5       go to state 160
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 126
 
-   70 expr8: expr8 '.' . expr9
+  121 scplus: '+' .
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-
-    expr9       go to state 151
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
+    $default  reduce using rule 121 (scplus)
 
 
 State 127
 
-   31 matched_stmt: break ';' .
+   76 expr5: expr5 scplus . expr6
 
-    $default  reduce using rule 31 (matched_stmt)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr6       go to state 161
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 128
 
-   37 print_stmt: print '(' . actuals ')'
+   77 expr5: expr5 scminus . expr6
 
-    $default  reduce using rule 74 (actuals)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    actuals  go to state 152
+    expr6       go to state 162
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 129
 
-   39 return_stmt: return expr .
+  123 sctimes: '*' .
 
-    $default  reduce using rule 39 (return_stmt)
+    $default  reduce using rule 123 (sctimes)
 
 
 State 130
 
-   67 expr7: scminus expr7 .
+  124 scdiv: '/' .
 
-    $default  reduce using rule 67 (expr7)
+    $default  reduce using rule 124 (scdiv)
 
 
 State 131
 
-   66 expr7: scneq expr7 .
+  125 scmod: '%' .
 
-    $default  reduce using rule 66 (expr7)
+    $default  reduce using rule 125 (scmod)
 
 
 State 132
 
-   43 common_if: "if" '(' expr . ')'
+   79 expr6: expr6 sctimes . expr7
 
-    ')'  shift, and go to state 153
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr7       go to state 163
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 133
 
-   73 expr9: '(' expr ')' .
+   80 expr6: expr6 scdiv . expr7
 
-    $default  reduce using rule 73 (expr9)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr7       go to state 164
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 134
 
-  102 else: "else" .
+   81 expr6: expr6 scmod . expr7
 
-    $default  reduce using rule 102 (else)
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr7       go to state 165
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 135
 
-   40 matched_if: common_if matched_stmt else . matched_stmt
-   41 unmatched_if: common_if matched_stmt else . unmatched_stmt
+   86 expr8: expr8 '[' . expr1 ']'
 
     "null"           shift, and go to state 47
-    "if"             shift, and go to state 48
-    "return"         shift, and go to state 49
-    "break"          shift, and go to state 50
-    "Print"          shift, and go to state 51
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
     T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    ';'              shift, and go to state 56
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    unmatched_stmt  go to state 154
-    matched_stmt    go to state 155
-    print_stmt      go to state 64
-    return_stmt     go to state 65
-    matched_if      go to state 66
-    unmatched_if    go to state 67
-    common_if       go to state 68
-    expr            go to state 69
-    expr1           go to state 70
-    expr2           go to state 71
-    expr3           go to state 72
-    expr4           go to state 73
-    expr5           go to state 74
-    expr6           go to state 75
-    expr7           go to state 76
-    expr8           go to state 77
-    expr9           go to state 78
-    constant        go to state 79
-    identifier      go to state 80
-    break           go to state 81
-    intlit          go to state 82
-    dbllit          go to state 83
-    boollit         go to state 84
-    stringlit       go to state 85
-    null            go to state 86
-    print           go to state 87
-    return          go to state 88
-    scminus         go to state 89
-    scneq           go to state 90
+    expr1       go to state 166
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
 
 
 State 136
 
-   47 expr1: expr1 or expr2 .
-   49 expr2: expr2 . and expr3
+   87 expr8: expr8 '.' . expr9
 
-    "&&"  shift, and go to state 102
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
 
-    $default  reduce using rule 47 (expr1)
-
-    and  go to state 103
+    expr9       go to state 167
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
 
 
 State 137
 
-   45 expr: expr1 sceq expr1 .
-   47 expr1: expr1 . or expr2
+   33 matched_stmt: break ';' .
 
-    "||"  shift, and go to state 98
-
-    $default  reduce using rule 45 (expr)
-
-    or  go to state 100
+    $default  reduce using rule 33 (matched_stmt)
 
 
 State 138
 
-   49 expr2: expr2 and expr3 .
-   51 expr3: expr3 . eq expr4
-   52      | expr3 . neq expr4
+   28 print_stmt: print '(' . print_actuals ')'
 
-    "=="  shift, and go to state 104
-    "!="  shift, and go to state 105
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
 
-    $default  reduce using rule 49 (expr2)
-
-    eq   go to state 106
-    neq  go to state 107
+    expr           go to state 168
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    print_actuals  go to state 169
+    constant       go to state 83
+    identifier     go to state 84
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    scminus        go to state 93
+    scneq          go to state 94
 
 
 State 139
 
-   51 expr3: expr3 eq expr4 .
-   54 expr4: expr4 . sclt expr5
-   55      | expr4 . scgt expr5
-   56      | expr4 . le expr5
-   57      | expr4 . ge expr5
+   30 return_stmt: return expr .
 
-    "<="  shift, and go to state 108
-    ">="  shift, and go to state 109
-    '<'   shift, and go to state 110
-    '>'   shift, and go to state 111
-
-    $default  reduce using rule 51 (expr3)
-
-    le    go to state 112
-    ge    go to state 113
-    sclt  go to state 114
-    scgt  go to state 115
+    $default  reduce using rule 30 (return_stmt)
 
 
 State 140
 
-   52 expr3: expr3 neq expr4 .
-   54 expr4: expr4 . sclt expr5
-   55      | expr4 . scgt expr5
-   56      | expr4 . le expr5
-   57      | expr4 . ge expr5
+   84 expr7: scminus expr7 .
 
-    "<="  shift, and go to state 108
-    ">="  shift, and go to state 109
-    '<'   shift, and go to state 110
-    '>'   shift, and go to state 111
-
-    $default  reduce using rule 52 (expr3)
-
-    le    go to state 112
-    ge    go to state 113
-    sclt  go to state 114
-    scgt  go to state 115
+    $default  reduce using rule 84 (expr7)
 
 
 State 141
 
-   56 expr4: expr4 le expr5 .
-   59 expr5: expr5 . scplus expr6
-   60      | expr5 . scminus expr6
+   83 expr7: scneq expr7 .
 
-    '+'  shift, and go to state 116
-    '-'  shift, and go to state 59
-
-    '-'       [reduce using rule 56 (expr4)]
-    $default  reduce using rule 56 (expr4)
-
-    scplus   go to state 117
-    scminus  go to state 118
+    $default  reduce using rule 83 (expr7)
 
 
 State 142
 
-   57 expr4: expr4 ge expr5 .
-   59 expr5: expr5 . scplus expr6
-   60      | expr5 . scminus expr6
+   57 common_while: "while" '(' expr . ')'
 
-    '+'  shift, and go to state 116
-    '-'  shift, and go to state 59
-
-    '-'       [reduce using rule 57 (expr4)]
-    $default  reduce using rule 57 (expr4)
-
-    scplus   go to state 117
-    scminus  go to state 118
+    ')'  shift, and go to state 170
 
 
 State 143
 
-   54 expr4: expr4 sclt expr5 .
-   59 expr5: expr5 . scplus expr6
-   60      | expr5 . scminus expr6
+   48 common_if: "if" '(' expr . ')'
 
-    '+'  shift, and go to state 116
-    '-'  shift, and go to state 59
-
-    '-'       [reduce using rule 54 (expr4)]
-    $default  reduce using rule 54 (expr4)
-
-    scplus   go to state 117
-    scminus  go to state 118
+    ')'  shift, and go to state 171
 
 
 State 144
 
-   55 expr4: expr4 scgt expr5 .
-   59 expr5: expr5 . scplus expr6
-   60      | expr5 . scminus expr6
+   90 expr9: '(' expr ')' .
 
-    '+'  shift, and go to state 116
-    '-'  shift, and go to state 59
-
-    '-'       [reduce using rule 55 (expr4)]
-    $default  reduce using rule 55 (expr4)
-
-    scplus   go to state 117
-    scminus  go to state 118
+    $default  reduce using rule 90 (expr9)
 
 
 State 145
 
-   59 expr5: expr5 scplus expr6 .
-   62 expr6: expr6 . sctimes expr7
-   63      | expr6 . scdiv expr7
-   64      | expr6 . scmod expr7
+   24 varDeclStar: varDeclStar . varDecl
+   46 matched_stmtBlock: varDeclStar . matched_stmtStar
 
-    '*'  shift, and go to state 119
-    '/'  shift, and go to state 120
-    '%'  shift, and go to state 121
+    "int"             shift, and go to state 6
+    "double"          shift, and go to state 7
+    "bool"            shift, and go to state 8
+    "string"          shift, and go to state 9
+    T_TYPEIDENTIFIER  shift, and go to state 10
 
-    $default  reduce using rule 59 (expr5)
+    $default  reduce using rule 42 (matched_stmtStar)
 
-    sctimes  go to state 122
-    scdiv    go to state 123
-    scmod    go to state 124
+    varDecl           go to state 45
+    variable          go to state 12
+    type              go to state 37
+    usertype          go to state 14
+    primtype          go to state 15
+    arraytype         go to state 16
+    matched_stmtStar  go to state 172
+    typeidentifier    go to state 18
+    string            go to state 19
+    int               go to state 20
+    double            go to state 21
+    bool              go to state 22
 
 
 State 146
 
-   60 expr5: expr5 scminus expr6 .
-   62 expr6: expr6 . sctimes expr7
-   63      | expr6 . scdiv expr7
-   64      | expr6 . scmod expr7
+   49 matched_if: common_if '{' matched_stmtBlock . '}' else '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock . '}' else matched_stmt
+   53 unmatched_if: common_if '{' matched_stmtBlock . '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock . '}' else unmatched_stmt
+   55             | common_if '{' matched_stmtBlock . '}'
 
-    '*'  shift, and go to state 119
-    '/'  shift, and go to state 120
-    '%'  shift, and go to state 121
-
-    $default  reduce using rule 60 (expr5)
-
-    sctimes  go to state 122
-    scdiv    go to state 123
-    scmod    go to state 124
+    '}'  shift, and go to state 173
 
 
 State 147
 
-   62 expr6: expr6 sctimes expr7 .
+  118 else: "else" .
 
-    $default  reduce using rule 62 (expr6)
+    $default  reduce using rule 118 (else)
 
 
 State 148
 
-   63 expr6: expr6 scdiv expr7 .
+   51 matched_if: common_if matched_stmt else . '{' matched_stmtBlock '}'
+   52           | common_if matched_stmt else . matched_stmt
 
-    $default  reduce using rule 63 (expr6)
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 174
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 175
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
 
 
 State 149
 
-   64 expr6: expr6 scmod expr7 .
+   49 matched_if: common_if '{' . matched_stmtBlock '}' else '{' matched_stmtBlock '}'
+   50           | common_if '{' . matched_stmtBlock '}' else matched_stmt
 
-    $default  reduce using rule 64 (expr6)
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar        go to state 145
+    matched_stmtBlock  go to state 176
 
 
 State 150
 
-   47 expr1: expr1 . or expr2
-   69 expr8: expr8 '[' expr1 . ']'
+   51 matched_if: common_if matched_stmt . else '{' matched_stmtBlock '}'
+   52           | common_if matched_stmt . else matched_stmt
 
-    "||"  shift, and go to state 98
-    ']'   shift, and go to state 156
+    "else"  shift, and go to state 147
 
-    or  go to state 100
+    else  go to state 148
 
 
 State 151
 
-   70 expr8: expr8 '.' expr9 .
+   58 matched_while: common_while '{' matched_stmtBlock . '}'
 
-    $default  reduce using rule 70 (expr8)
+    '}'  shift, and go to state 177
 
 
 State 152
 
-   37 print_stmt: print '(' actuals . ')'
-   75 actuals: actuals . expr
-   76        | actuals . ',' expr
+   64 expr1: expr1 or expr2 .
+   66 expr2: expr2 . and expr3
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    ')'              shift, and go to state 157
-    ','              shift, and go to state 158
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    "&&"  shift, and go to state 112
 
-    expr        go to state 159
-    expr1       go to state 70
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 64 (expr1)
+
+    and  go to state 113
 
 
 State 153
 
-   43 common_if: "if" '(' expr ')' .
+   62 expr: expr1 sceq expr1 .
+   64 expr1: expr1 . or expr2
 
-    $default  reduce using rule 43 (common_if)
+    "||"  shift, and go to state 108
+
+    $default  reduce using rule 62 (expr)
+
+    or  go to state 110
 
 
 State 154
 
-   41 unmatched_if: common_if matched_stmt else unmatched_stmt .
+   66 expr2: expr2 and expr3 .
+   68 expr3: expr3 . eq expr4
+   69      | expr3 . neq expr4
 
-    $default  reduce using rule 41 (unmatched_if)
+    "=="  shift, and go to state 114
+    "!="  shift, and go to state 115
+
+    $default  reduce using rule 66 (expr2)
+
+    eq   go to state 116
+    neq  go to state 117
 
 
 State 155
 
-   40 matched_if: common_if matched_stmt else matched_stmt .
+   68 expr3: expr3 eq expr4 .
+   71 expr4: expr4 . sclt expr5
+   72      | expr4 . scgt expr5
+   73      | expr4 . le expr5
+   74      | expr4 . ge expr5
 
-    $default  reduce using rule 40 (matched_if)
+    "<="  shift, and go to state 118
+    ">="  shift, and go to state 119
+    '<'   shift, and go to state 120
+    '>'   shift, and go to state 121
+
+    $default  reduce using rule 68 (expr3)
+
+    le    go to state 122
+    ge    go to state 123
+    sclt  go to state 124
+    scgt  go to state 125
 
 
 State 156
 
-   69 expr8: expr8 '[' expr1 ']' .
+   69 expr3: expr3 neq expr4 .
+   71 expr4: expr4 . sclt expr5
+   72      | expr4 . scgt expr5
+   73      | expr4 . le expr5
+   74      | expr4 . ge expr5
 
-    $default  reduce using rule 69 (expr8)
+    "<="  shift, and go to state 118
+    ">="  shift, and go to state 119
+    '<'   shift, and go to state 120
+    '>'   shift, and go to state 121
+
+    $default  reduce using rule 69 (expr3)
+
+    le    go to state 122
+    ge    go to state 123
+    sclt  go to state 124
+    scgt  go to state 125
 
 
 State 157
 
-   37 print_stmt: print '(' actuals ')' .
+   73 expr4: expr4 le expr5 .
+   76 expr5: expr5 . scplus expr6
+   77      | expr5 . scminus expr6
 
-    $default  reduce using rule 37 (print_stmt)
+    '+'  shift, and go to state 126
+    '-'  shift, and go to state 60
+
+    $default  reduce using rule 73 (expr4)
+
+    scplus   go to state 127
+    scminus  go to state 128
 
 
 State 158
 
-   76 actuals: actuals ',' . expr
+   74 expr4: expr4 ge expr5 .
+   76 expr5: expr5 . scplus expr6
+   77      | expr5 . scminus expr6
 
-    "null"           shift, and go to state 47
-    T_DBLLITERAL     shift, and go to state 52
-    T_INTLITERAL     shift, and go to state 53
-    T_BOOLLITERAL    shift, and go to state 54
-    T_IDENTIFIER     shift, and go to state 25
-    T_STRINGLITERAL  shift, and go to state 55
-    '('              shift, and go to state 57
-    '-'              shift, and go to state 59
-    '!'              shift, and go to state 60
+    '+'  shift, and go to state 126
+    '-'  shift, and go to state 60
 
-    expr        go to state 160
-    expr1       go to state 70
-    expr2       go to state 71
-    expr3       go to state 72
-    expr4       go to state 73
-    expr5       go to state 74
-    expr6       go to state 75
-    expr7       go to state 76
-    expr8       go to state 77
-    expr9       go to state 78
-    constant    go to state 79
-    identifier  go to state 80
-    intlit      go to state 82
-    dbllit      go to state 83
-    boollit     go to state 84
-    stringlit   go to state 85
-    null        go to state 86
-    scminus     go to state 89
-    scneq       go to state 90
+    $default  reduce using rule 74 (expr4)
+
+    scplus   go to state 127
+    scminus  go to state 128
 
 
 State 159
 
-   75 actuals: actuals expr .
+   71 expr4: expr4 sclt expr5 .
+   76 expr5: expr5 . scplus expr6
+   77      | expr5 . scminus expr6
 
-    $default  reduce using rule 75 (actuals)
+    '+'  shift, and go to state 126
+    '-'  shift, and go to state 60
+
+    $default  reduce using rule 71 (expr4)
+
+    scplus   go to state 127
+    scminus  go to state 128
 
 
 State 160
 
-   76 actuals: actuals ',' expr .
+   72 expr4: expr4 scgt expr5 .
+   76 expr5: expr5 . scplus expr6
+   77      | expr5 . scminus expr6
 
-    $default  reduce using rule 76 (actuals)
+    '+'  shift, and go to state 126
+    '-'  shift, and go to state 60
+
+    $default  reduce using rule 72 (expr4)
+
+    scplus   go to state 127
+    scminus  go to state 128
+
+
+State 161
+
+   76 expr5: expr5 scplus expr6 .
+   79 expr6: expr6 . sctimes expr7
+   80      | expr6 . scdiv expr7
+   81      | expr6 . scmod expr7
+
+    '*'  shift, and go to state 129
+    '/'  shift, and go to state 130
+    '%'  shift, and go to state 131
+
+    $default  reduce using rule 76 (expr5)
+
+    sctimes  go to state 132
+    scdiv    go to state 133
+    scmod    go to state 134
+
+
+State 162
+
+   77 expr5: expr5 scminus expr6 .
+   79 expr6: expr6 . sctimes expr7
+   80      | expr6 . scdiv expr7
+   81      | expr6 . scmod expr7
+
+    '*'  shift, and go to state 129
+    '/'  shift, and go to state 130
+    '%'  shift, and go to state 131
+
+    $default  reduce using rule 77 (expr5)
+
+    sctimes  go to state 132
+    scdiv    go to state 133
+    scmod    go to state 134
+
+
+State 163
+
+   79 expr6: expr6 sctimes expr7 .
+
+    $default  reduce using rule 79 (expr6)
+
+
+State 164
+
+   80 expr6: expr6 scdiv expr7 .
+
+    $default  reduce using rule 80 (expr6)
+
+
+State 165
+
+   81 expr6: expr6 scmod expr7 .
+
+    $default  reduce using rule 81 (expr6)
+
+
+State 166
+
+   64 expr1: expr1 . or expr2
+   86 expr8: expr8 '[' expr1 . ']'
+
+    "||"  shift, and go to state 108
+    ']'   shift, and go to state 178
+
+    or  go to state 110
+
+
+State 167
+
+   87 expr8: expr8 '.' expr9 .
+
+    $default  reduce using rule 87 (expr8)
+
+
+State 168
+
+   91 print_actuals: expr .
+
+    $default  reduce using rule 91 (print_actuals)
+
+
+State 169
+
+   28 print_stmt: print '(' print_actuals . ')'
+   92 print_actuals: print_actuals . ',' expr
+
+    ')'  shift, and go to state 179
+    ','  shift, and go to state 180
+
+
+State 170
+
+   57 common_while: "while" '(' expr ')' .
+
+    $default  reduce using rule 57 (common_while)
+
+
+State 171
+
+   48 common_if: "if" '(' expr ')' .
+
+    $default  reduce using rule 48 (common_if)
+
+
+State 172
+
+   43 matched_stmtStar: matched_stmtStar . matched_stmt
+   46 matched_stmtBlock: varDeclStar matched_stmtStar .
+
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    $default  reduce using rule 46 (matched_stmtBlock)
+
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 181
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
+
+
+State 173
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' . else '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock '}' . else matched_stmt
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' . else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock '}' . else unmatched_stmt
+   55             | common_if '{' matched_stmtBlock '}' .
+
+    "else"  shift, and go to state 147
+
+    $default  reduce using rule 55 (unmatched_if)
+
+    else  go to state 182
+
+
+State 174
+
+   51 matched_if: common_if matched_stmt else '{' . matched_stmtBlock '}'
+
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar        go to state 145
+    matched_stmtBlock  go to state 183
+
+
+State 175
+
+   52 matched_if: common_if matched_stmt else matched_stmt .
+
+    $default  reduce using rule 52 (matched_if)
+
+
+State 176
+
+   49 matched_if: common_if '{' matched_stmtBlock . '}' else '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock . '}' else matched_stmt
+
+    '}'  shift, and go to state 184
+
+
+State 177
+
+   58 matched_while: common_while '{' matched_stmtBlock '}' .
+
+    $default  reduce using rule 58 (matched_while)
+
+
+State 178
+
+   86 expr8: expr8 '[' expr1 ']' .
+
+    $default  reduce using rule 86 (expr8)
+
+
+State 179
+
+   28 print_stmt: print '(' print_actuals ')' .
+
+    $default  reduce using rule 28 (print_stmt)
+
+
+State 180
+
+   92 print_actuals: print_actuals ',' . expr
+
+    "null"           shift, and go to state 47
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    '('              shift, and go to state 58
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    expr        go to state 185
+    expr1       go to state 74
+    expr2       go to state 75
+    expr3       go to state 76
+    expr4       go to state 77
+    expr5       go to state 78
+    expr6       go to state 79
+    expr7       go to state 80
+    expr8       go to state 81
+    expr9       go to state 82
+    constant    go to state 83
+    identifier  go to state 84
+    intlit      go to state 86
+    dbllit      go to state 87
+    boollit     go to state 88
+    stringlit   go to state 89
+    null        go to state 90
+    scminus     go to state 93
+    scneq       go to state 94
+
+
+State 181
+
+   43 matched_stmtStar: matched_stmtStar matched_stmt .
+
+    $default  reduce using rule 43 (matched_stmtStar)
+
+
+State 182
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' else . '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock '}' else . matched_stmt
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else . '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock '}' else . unmatched_stmt
+
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 186
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    print_stmt       go to state 62
+    return_stmt      go to state 63
+    matched_stmt     go to state 187
+    unmatched_stmt   go to state 188
+    common_if        go to state 67
+    matched_if       go to state 68
+    unmatched_if     go to state 69
+    common_while     go to state 70
+    matched_while    go to state 71
+    unmatched_while  go to state 72
+    expr             go to state 73
+    expr1            go to state 74
+    expr2            go to state 75
+    expr3            go to state 76
+    expr4            go to state 77
+    expr5            go to state 78
+    expr6            go to state 79
+    expr7            go to state 80
+    expr8            go to state 81
+    expr9            go to state 82
+    constant         go to state 83
+    identifier       go to state 84
+    break            go to state 85
+    intlit           go to state 86
+    dbllit           go to state 87
+    boollit          go to state 88
+    stringlit        go to state 89
+    null             go to state 90
+    print            go to state 91
+    return           go to state 92
+    scminus          go to state 93
+    scneq            go to state 94
+
+
+State 183
+
+   51 matched_if: common_if matched_stmt else '{' matched_stmtBlock . '}'
+
+    '}'  shift, and go to state 189
+
+
+State 184
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' . else '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock '}' . else matched_stmt
+
+    "else"  shift, and go to state 147
+
+    else  go to state 190
+
+
+State 185
+
+   92 print_actuals: print_actuals ',' expr .
+
+    $default  reduce using rule 92 (print_actuals)
+
+
+State 186
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' else '{' . matched_stmtBlock '}'
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else '{' . unmatched_stmtBlock '}'
+
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar          go to state 191
+    matched_stmtBlock    go to state 192
+    unmatched_stmtBlock  go to state 193
+
+
+State 187
+
+   50 matched_if: common_if '{' matched_stmtBlock '}' else matched_stmt .
+
+    $default  reduce using rule 50 (matched_if)
+
+
+State 188
+
+   54 unmatched_if: common_if '{' matched_stmtBlock '}' else unmatched_stmt .
+
+    $default  reduce using rule 54 (unmatched_if)
+
+
+State 189
+
+   51 matched_if: common_if matched_stmt else '{' matched_stmtBlock '}' .
+
+    $default  reduce using rule 51 (matched_if)
+
+
+State 190
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' else . '{' matched_stmtBlock '}'
+   50           | common_if '{' matched_stmtBlock '}' else . matched_stmt
+
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 194
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 187
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
+
+
+State 191
+
+   24 varDeclStar: varDeclStar . varDecl
+   46 matched_stmtBlock: varDeclStar . matched_stmtStar
+   47 unmatched_stmtBlock: varDeclStar . unmatched_stmtStar
+
+    "int"             shift, and go to state 6
+    "double"          shift, and go to state 7
+    "bool"            shift, and go to state 8
+    "string"          shift, and go to state 9
+    T_TYPEIDENTIFIER  shift, and go to state 10
+
+    "while"   reduce using rule 42 (matched_stmtStar)
+    "while"   [reduce using rule 44 (unmatched_stmtStar)]
+    "if"      reduce using rule 42 (matched_stmtStar)
+    "if"      [reduce using rule 44 (unmatched_stmtStar)]
+    '}'       reduce using rule 42 (matched_stmtStar)
+    '}'       [reduce using rule 44 (unmatched_stmtStar)]
+    $default  reduce using rule 42 (matched_stmtStar)
+
+    varDecl             go to state 45
+    variable            go to state 12
+    type                go to state 37
+    usertype            go to state 14
+    primtype            go to state 15
+    arraytype           go to state 16
+    matched_stmtStar    go to state 172
+    unmatched_stmtStar  go to state 195
+    typeidentifier      go to state 18
+    string              go to state 19
+    int                 go to state 20
+    double              go to state 21
+    bool                go to state 22
+
+
+State 192
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' else '{' matched_stmtBlock . '}'
+
+    '}'  shift, and go to state 196
+
+
+State 193
+
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else '{' unmatched_stmtBlock . '}'
+
+    '}'  shift, and go to state 197
+
+
+State 194
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' else '{' . matched_stmtBlock '}'
+
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar        go to state 145
+    matched_stmtBlock  go to state 192
+
+
+State 195
+
+   45 unmatched_stmtStar: unmatched_stmtStar . unmatched_stmt
+   47 unmatched_stmtBlock: varDeclStar unmatched_stmtStar .
+
+    "while"  shift, and go to state 48
+    "if"     shift, and go to state 49
+
+    $default  reduce using rule 47 (unmatched_stmtBlock)
+
+    unmatched_stmt   go to state 198
+    common_if        go to state 199
+    unmatched_if     go to state 69
+    common_while     go to state 200
+    unmatched_while  go to state 72
+
+
+State 196
+
+   49 matched_if: common_if '{' matched_stmtBlock '}' else '{' matched_stmtBlock '}' .
+
+    $default  reduce using rule 49 (matched_if)
+
+
+State 197
+
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else '{' unmatched_stmtBlock '}' .
+
+    $default  reduce using rule 53 (unmatched_if)
+
+
+State 198
+
+   45 unmatched_stmtStar: unmatched_stmtStar unmatched_stmt .
+
+    $default  reduce using rule 45 (unmatched_stmtStar)
+
+
+State 199
+
+   53 unmatched_if: common_if . '{' matched_stmtBlock '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if . '{' matched_stmtBlock '}' else unmatched_stmt
+   55             | common_if . '{' matched_stmtBlock '}'
+   56             | common_if . matched_stmt
+
+    "null"           shift, and go to state 47
+    "while"          shift, and go to state 48
+    "if"             shift, and go to state 49
+    "return"         shift, and go to state 50
+    "break"          shift, and go to state 51
+    "Print"          shift, and go to state 52
+    T_DBLLITERAL     shift, and go to state 53
+    T_INTLITERAL     shift, and go to state 54
+    T_BOOLLITERAL    shift, and go to state 55
+    T_IDENTIFIER     shift, and go to state 25
+    T_STRINGLITERAL  shift, and go to state 56
+    ';'              shift, and go to state 57
+    '('              shift, and go to state 58
+    '{'              shift, and go to state 201
+    '-'              shift, and go to state 60
+    '!'              shift, and go to state 61
+
+    print_stmt     go to state 62
+    return_stmt    go to state 63
+    matched_stmt   go to state 202
+    common_if      go to state 102
+    matched_if     go to state 68
+    common_while   go to state 103
+    matched_while  go to state 71
+    expr           go to state 73
+    expr1          go to state 74
+    expr2          go to state 75
+    expr3          go to state 76
+    expr4          go to state 77
+    expr5          go to state 78
+    expr6          go to state 79
+    expr7          go to state 80
+    expr8          go to state 81
+    expr9          go to state 82
+    constant       go to state 83
+    identifier     go to state 84
+    break          go to state 85
+    intlit         go to state 86
+    dbllit         go to state 87
+    boollit        go to state 88
+    stringlit      go to state 89
+    null           go to state 90
+    print          go to state 91
+    return         go to state 92
+    scminus        go to state 93
+    scneq          go to state 94
+
+
+State 200
+
+   60 unmatched_while: common_while . unmatched_stmt
+
+    "while"  shift, and go to state 48
+    "if"     shift, and go to state 49
+
+    unmatched_stmt   go to state 106
+    common_if        go to state 199
+    unmatched_if     go to state 69
+    common_while     go to state 200
+    unmatched_while  go to state 72
+
+
+State 201
+
+   53 unmatched_if: common_if '{' . matched_stmtBlock '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' . matched_stmtBlock '}' else unmatched_stmt
+   55             | common_if '{' . matched_stmtBlock '}'
+
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar        go to state 145
+    matched_stmtBlock  go to state 203
+
+
+State 202
+
+   56 unmatched_if: common_if matched_stmt .
+
+    $default  reduce using rule 56 (unmatched_if)
+
+
+State 203
+
+   53 unmatched_if: common_if '{' matched_stmtBlock . '}' else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock . '}' else unmatched_stmt
+   55             | common_if '{' matched_stmtBlock . '}'
+
+    '}'  shift, and go to state 204
+
+
+State 204
+
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' . else '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock '}' . else unmatched_stmt
+   55             | common_if '{' matched_stmtBlock '}' .
+
+    "else"  shift, and go to state 147
+
+    $default  reduce using rule 55 (unmatched_if)
+
+    else  go to state 205
+
+
+State 205
+
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else . '{' unmatched_stmtBlock '}'
+   54             | common_if '{' matched_stmtBlock '}' else . unmatched_stmt
+
+    "while"  shift, and go to state 48
+    "if"     shift, and go to state 49
+    '{'      shift, and go to state 206
+
+    unmatched_stmt   go to state 188
+    common_if        go to state 199
+    unmatched_if     go to state 69
+    common_while     go to state 200
+    unmatched_while  go to state 72
+
+
+State 206
+
+   53 unmatched_if: common_if '{' matched_stmtBlock '}' else '{' . unmatched_stmtBlock '}'
+
+    $default  reduce using rule 23 (varDeclStar)
+
+    varDeclStar          go to state 207
+    unmatched_stmtBlock  go to state 193
+
+
+State 207
+
+   24 varDeclStar: varDeclStar . varDecl
+   47 unmatched_stmtBlock: varDeclStar . unmatched_stmtStar
+
+    "int"             shift, and go to state 6
+    "double"          shift, and go to state 7
+    "bool"            shift, and go to state 8
+    "string"          shift, and go to state 9
+    T_TYPEIDENTIFIER  shift, and go to state 10
+
+    $default  reduce using rule 44 (unmatched_stmtStar)
+
+    varDecl             go to state 45
+    variable            go to state 12
+    type                go to state 37
+    usertype            go to state 14
+    primtype            go to state 15
+    arraytype           go to state 16
+    unmatched_stmtStar  go to state 195
+    typeidentifier      go to state 18
+    string              go to state 19
+    int                 go to state 20
+    double              go to state 21
+    bool                go to state 22
