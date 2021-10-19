@@ -90,26 +90,32 @@ varDecl: variable ';'
 funcDecl: type identifier[i1] '(' formals[f1] ')' stmtblock[s1] {$$ = new parse_tree("functiondecl", 4, $type, $i1, $f1, $s1); }
         | void identifier[i2] '(' formals[f2] ')' stmtblock[s2] {$$ = new parse_tree("functiondecl", 4, $void, $i2, $f2, $s2); }
 
-interfaceDecl: "interface" identifier[a] '{' prototypes[b] '}' {$$ = new parse_tree("interface", 2, $a, $b);}
+/* Class Declarations */
+classDecl: class identifier[a] '{' fields '}' {$$ = new parse_tree("class", 4, $a, nullptr, nullptr, $fields);}
+         | class typeidentifier[a] ext '{' fields '}' {$$ = new parse_tree("class", 4, $a, $ext, nullptr, $fields);}
+         | class typeidentifier[a] implements imp '{' fields '}' {$$ = new parse_tree("class", 4, $a, nullptr, $imp, $fields);}
+         | class typeidentifier[a] ext implements imp '{' fields '}' {$$ = new parse_tree("class", 4, $a, $ext, $imp, $fields);}
+
+fields: /* empty */ {$$ = new parse_tree("fields");}
+        | fields funcDecl {$1->add_child($2); $$ = $1; }
+        | fields varDecl {$1->add_child($2); $$ = $1; }
+
+imp: identifier[i] {$$ = new parse_tree("implements", 1, $i); }
+   | imp ',' identifier[i] {$1->add_child($i); $$ = $1; }
+
+ext: extends identifier[i] {$$ = new parse_tree("extends", 1, $i); }
+   | extends typeidentifier[i] {$$ = new parse_tree("extends", 1, $i); }
+
+functionCall: identifier[a] '(' actuals[b] ')' {$$ = new parse_tree("call", 2, $a, $b);}
+            /* | expr1 '.' identifier[i] '(' actuals[a] ')' {$$ = new parse_tree("call", 2, $i, $a);} */
+            /* very problematic above */
+interfaceDecl: interface identifier[a] '{' prototypes[b] '}' {$$ = new parse_tree("interface", 2, $a, $b);}
 
 prototypes: /* empty */ {$$ = new parse_tree("prototypes");}
         | prototypes prototypeDecl {$1->add_child($2); $$ = $1; }
 
 prototypeDecl: type identifier[i1] '(' formals[f1] ')' ';'{$$ = new parse_tree("prototype", 3, $type, $i1, $f1); }
         | void identifier[i2] '(' formals[f2] ')' ';'{$$ = new parse_tree("prototype", 3, $void, $i2, $f2); }
-
-/* Class Declarations */
-classDecl: class identifier[a] extends01 implements01 '{' fields '}' {$$ = new parse_tree("class", 4, $a, nullptr, nullptr, $fields);}
-
-fields: /* empty */ {$$ = new parse_tree("fields");}
-        | fields funcDecl {$1->add_child($2); $$ = $1; }
-        | fields varDecl {$1->add_child($2); $$ = $1; }
-
-implements: /* empty */ {$$ = new parse_tree("implements"); }
-       | implements[f1] identifier[v1] {$f1->add_child($v1); $$ = $1; }
-       | implements[f2] identifier[v2] ',' {$f2->add_child($v2); $$ = $1; }
-
-functionCall: identifier[a] '(' actuals[b] ')' {$$ = new parse_tree("call", 2, $a, $b);}
 
 variable: type identifier {$$ = new parse_tree("variable", 2, $type, $identifier); }
 
@@ -131,7 +137,7 @@ funcDecl: type identifier[i1] '(' formals[f1] ')' stmtblock[s1] {$$ = new parse_
 
 formals: /* empty */ {$$ = new parse_tree("formals"); }
        | formals[f1] variable[v1] {$f1->add_child($v1); $$ = $1; }
-       | formals[f2] variable[v2] ',' {$f2->add_child($v2); $$ = $1; }
+       | formals[f2] ',' variable[v2] {$f2->add_child($v2); $$ = $1; }
 
 varDeclStar: /* empty */ {$$ = new parse_tree("vardecls");}
            | varDeclStar varDecl {$1->add_child($2); $$ = $1; }
@@ -179,7 +185,7 @@ unmatched_if: common_if matched_stmt[s1] {$$->add_child($s1);
                                             $$->add_child(nullptr);
                                             $$ = $common_if;}
 
-common_while: "while" '(' expr ')' {$$ = new parse_tree("while", 1, $expr);}
+common_while: while '(' expr ')' {$$ = new parse_tree("while", 1, $expr);}
 
 matched_while: common_while matched_stmt[s1] {$$ ->add_child($s1);
                                               $$ = $common_while;}
@@ -187,10 +193,10 @@ matched_while: common_while matched_stmt[s1] {$$ ->add_child($s1);
 unmatched_while: common_while unmatched_stmt[s1] {$$->add_child($s1);
                                                   $$ = $common_while;}
 
-common_for: "for" '(' expr[a] ';' expr[b] ';' expr[c] ')' {$$ = new parse_tree("for", 3, $a, $b, $c);}
-            | "for" '(' ';' expr[a] ';' expr[b] ')' {$$ = new parse_tree("for", 3, nullptr, $a, $b);}
-            | "for" '(' expr[a] ';' expr[b] ';' ')' {$$ = new parse_tree("for", 3, $a, $b, nullptr);}
-            | "for" '(' ';' expr ';' ')' {$$ = new parse_tree("for", 3, nullptr, $expr, nullptr);}
+common_for: for '(' expr[a] ';' expr[b] ';' expr[c] ')' {$$ = new parse_tree("for", 3, $a, $b, $c);}
+            | for '(' ';' expr[a] ';' expr[b] ')' {$$ = new parse_tree("for", 3, nullptr, $a, $b);}
+            | for '(' expr[a] ';' expr[b] ';' ')' {$$ = new parse_tree("for", 3, $a, $b, nullptr);}
+            | for '(' ';' expr ';' ')' {$$ = new parse_tree("for", 3, nullptr, $expr, nullptr);}
 
 matched_for: common_for matched_stmt[s1] {$$ ->add_child($s1);
                                           $$ = $common_for;}
@@ -288,6 +294,13 @@ if: T_IF { $$ = new parse_tree(mytok); }
 else: T_ELSE { $$ = new parse_tree(mytok); }
 print: T_PRINT { $$ = new parse_tree(mytok); }
 return: T_RETURN { $$ = new parse_tree(mytok); }
+class: T_CLASS { $$ = new parse_tree(mytok); }
+extends: T_EXTENDS { $$ = new parse_tree(mytok); }
+implements: T_IMPLEMENTS { $$ = new parse_tree(mytok); }
+for: T_FOR { $$ = new parse_tree(mytok); }
+while: T_WHILE { $$ = new parse_tree(mytok); }
+interface: T_INTERFACE { $$ = new parse_tree(mytok); }
+
 
 /* single character terminals */
 scplus: '+' { $$ = new parse_tree(mytok); }

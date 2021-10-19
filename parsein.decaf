@@ -191,49 +191,49 @@ class multiinterface implements foo,bar,baz
    }
 }
 
-// class umbrella extends thing implements toggleable
-// {
-//    bool closed;
-//
-//    void toggle()
-//    {
-//       closed = !closed;
-//    }
-//    void open()
-//    {
-//      closed = false;
-//    }
-//    void close()
-//    {
-//      closed = true;
-//    }
-// }
-//
-// /* Finished adding interfaces. Improved my grammar by declaring a
-// function_header non-terminal that can be used by both prototypes
-// and function declarations. */
-//
-// interface toggleable {
-//    void toggle(int a);
-// }
-//
-// interface comparable {
-//    int compareTo(Object obj);
-// }
-//
-// /* Now back to finishing up expressions. */
-//
-// /* Field accesses, calls on complex expressions, array references */
-//
-// void reallyfun()
-// {
-//    x = thing.field;
-//    y = thing.fn(y);
-//    z = some.containedarray[45];
-//    a = b + c.d.e()[0];
-//    q = r.d(e())[0].f();
-// }
-//
+class umbrella extends thing implements toggleable
+{
+   bool closed;
+
+   void toggle()
+   {
+      closed = !closed;
+   }
+   void open()
+   {
+     closed = false;
+   }
+   void close()
+   {
+     closed = true;
+   }
+}
+
+/* Finished adding interfaces. Improved my grammar by declaring a
+function_header non-terminal that can be used by both prototypes
+and function declarations. */
+
+interface toggleable {
+   void toggle(int a);
+}
+
+interface comparable {
+   int compareTo(Object obj);
+}
+
+/* Now back to finishing up expressions. */
+
+/* Field accesses, calls on complex expressions, array references */
+
+void reallyfun()
+{
+   x = thing.field;
+   y = thing.fn(y);
+   z = some.containedarray[45];
+   a = b + c.d.e()[0];
+   q = r && b.d(e())[0].f();
+}
+
 // /* this and built-ins */
 //
 // void last()
