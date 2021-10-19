@@ -1333,7 +1333,7 @@ YY_RULE_SETUP
                         if (string_content == "ReadInteger")
                             return make_token(T_READINTEGER, current_line);
                         if (string_content == "ReadLine")
-                            return make_token(T_READLINE, current_line);
+                            return make_token(T_READLINE, current_line); 
                         else
                           return make_token(T_TYPEIDENTIFIER, current_line, yytext);}
 	YY_BREAK

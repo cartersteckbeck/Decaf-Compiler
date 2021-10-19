@@ -111,7 +111,7 @@ false {return make_token(T_BOOLLITERAL, current_line, yytext); }
                         if (string_content == "ReadInteger")
                             return make_token(T_READINTEGER, current_line);
                         if (string_content == "ReadLine")
-                            return make_token(T_READLINE, current_line);
+                            return make_token(T_READLINE, current_line); 
                         else
                           return make_token(T_TYPEIDENTIFIER, current_line, yytext);}
 {DBLLITERAL} { return make_token(T_DBLLITERAL, current_line, yytext); }

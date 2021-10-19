@@ -51,6 +51,7 @@ extern bool semantic_checks; // defined in the compiler main file.
 /* We need this to see syntax errors. */
 int yyerror(char const *s)
 {
+
    std::cout << "line " << current_line << ": ";
    std::cout << s << std::endl;
    // exit at the first error.
@@ -78,9 +79,38 @@ program: decl {$$ = $1; }
 decl: /* empty */ {$$ = new parse_tree("program"); }
       | decl varDecl {$1->add_child($2); $$ = $1; }
       | decl funcDecl {$1->add_child($2); $$ = $1; }
+      | decl prototypeDecl {$1->add_child($2); $$ = $1; }
+      | decl interfaceDecl {$1->add_child($2); $$ = $1; }
+      | decl classDecl {$1->add_child($2); $$ = $1; }
 
 /* Variable Declarations */
 varDecl: variable ';'
+
+/* Function Declarations */
+funcDecl: type identifier[i1] '(' formals[f1] ')' stmtblock[s1] {$$ = new parse_tree("functiondecl", 4, $type, $i1, $f1, $s1); }
+        | void identifier[i2] '(' formals[f2] ')' stmtblock[s2] {$$ = new parse_tree("functiondecl", 4, $void, $i2, $f2, $s2); }
+
+interfaceDecl: "interface" identifier[a] '{' prototypes[b] '}' {$$ = new parse_tree("interface", 2, $a, $b);}
+
+prototypes: /* empty */ {$$ = new parse_tree("prototypes");} 
+        | prototypes prototypeDecl {$1->add_child($2); $$ = $1; }
+
+prototypeDecl: type identifier[i1] '(' formals[f1] ')' ';'{$$ = new parse_tree("prototype", 3, $type, $i1, $f1); }
+        | void identifier[i2] '(' formals[f2] ')' ';'{$$ = new parse_tree("prototype", 3, $void, $i2, $f2); }
+
+classDecl: "class" identifier[a] '{' fields '}'{$$ = new parse_tree("class", 4, $a, nullptr, nullptr, $fields);} 
+        | "class" identifier[a] "implements" implements '{' fields '}'{$$ = new parse_tree("class", 4, $a, nullptr, $implements, $fields);} 
+        | "class" identifier[a] "extends" identifier[b] "implements" identifier[c] '{' fields '}'{$$ = new parse_tree("classdecl", 4, $a, $b, $c, $fields);} 
+
+fields: /* empty */ {$$ = new parse_tree("fields");} 
+        | fields funcDecl {$1->add_child($2); $$ = $1; }
+        | fields varDecl {$1->add_child($2); $$ = $1; }
+
+implements: /* empty */ {$$ = new parse_tree("implements"); }
+       | implements[f1] identifier[v1] {$f1->add_child($v1); $$ = $1; }
+       | implements[f2] identifier[v2] ',' {$f2->add_child($v2); $$ = $1; }
+
+functionCall: identifier[a] '(' actuals[b] ')' {$$ = new parse_tree("call", 2, $a, $b);} 
 
 variable: type identifier {$$ = new parse_tree("variable", 2, $type, $identifier); }
 
@@ -116,6 +146,7 @@ print_stmt: print '(' print_actuals ')' {$$ = new parse_tree("print", 2, $print,
 
 return_stmt: return {$$ = new parse_tree("return", 1, $return); }
            | return expr {$$ = new parse_tree("return", 2, $return, $expr); }
+           | return functionCall {$$ = new parse_tree("return", 2, $return, $functionCall); }
 
 /* statements */
 stmt: matched_stmt | unmatched_stmt
@@ -127,6 +158,8 @@ matched_stmt: break ';' {$$ = new parse_tree("break", 1, $break); }
             | return_stmt ';'
             | matched_if
             | matched_while
+            | matched_for
+            | functionCall ';'
 
 unmatched_stmt: unmatched_if|unmatched_while
 
@@ -160,13 +193,15 @@ matched_if: common_if '{' matched_stmtBlock[s1] '}' else '{' matched_stmtBlock[s
 unmatched_if: common_if '{' matched_stmtBlock[s1] '}' else '{' unmatched_stmtBlock[s2] '}' {$$->add_child($s1);
                                                                   $$->add_child($s2);
                                                                   $$ = $common_if;}
-            |
-              common_if '{' matched_stmtBlock[s1] '}' else unmatched_stmt[s2] {$$->add_child($s1);
+            | common_if '{' matched_stmtBlock[s1] '}' else unmatched_stmt[s2] {$$->add_child($s1);
                                                                   $$->add_child($s2);
                                                                   $$ = $common_if;}
             | common_if '{' matched_stmtBlock[s1] '}' {$$->add_child($s1);
-                                                                  $$->add_child(nullptr);
+                                                                 $$->add_child(nullptr);
                                                                   $$ = $common_if;}
+	    | common_if '{' unmatched_stmtBlock[s1] '}' else matched_stmt[s2] {$$->add_child($s1);
+									 $$->add_child($s2);
+									 $$ = $common_if;}
             | common_if matched_stmt[s1] {$$->add_child($s1);
                               $$->add_child(nullptr);
                               $$ = $common_if;}
@@ -180,6 +215,16 @@ matched_while: common_while '{' matched_stmtBlock[s1] '}' {$$ ->add_child($s1);
 
 unmatched_while: common_while unmatched_stmt[s1] {$$->add_child($s1);
                                           $$ = $common_while;}
+
+common_for: "for" '(' expr[a] ';' expr[b] ';' expr[c] ')' {$$ = new parse_tree("for", 3, $a, $b, $c);}
+            | "for" '(' ';' expr[a] ';' expr[b] ')' {$$ = new parse_tree("for", 3, nullptr, $a, $b);}
+            | "for" '(' expr[a] ';' expr[b] ';' ')' {$$ = new parse_tree("for", 3, $a, $b, nullptr);}
+            | "for" '(' ';' expr ';' ')' {$$ = new parse_tree("for", 3, nullptr, $expr, nullptr);}
+
+matched_for: common_for '{' matched_stmtBlock[s1] '}' {$$ ->add_child($s1);
+                                                        $$ = $common_for;}
+            | common_for matched_stmt[s1] {$$ ->add_child($s1);
+                                        $$ = $common_for;}
 
 /* Expressions */
 
