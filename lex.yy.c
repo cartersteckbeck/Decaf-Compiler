@@ -1301,7 +1301,8 @@ YY_RULE_SETUP
                         if (string_content == "string")
                             return make_token(T_STRING, current_line, yytext);
                         if (string_content == "class")
-                            return make_token(T_CLASS, current_line);
+                            { std::cout << "yyTEXT IS: " << yytext[7] << std::endl;
+                              return make_token(T_CLASS, current_line);}
                         if (string_content == "interface")
                             return make_token(T_INTERFACE, current_line);
                         if (string_content == "null")
@@ -1339,101 +1340,101 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 117 "decaf.l"
+#line 118 "decaf.l"
 { return make_token(T_DBLLITERAL, current_line, yytext); }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 118 "decaf.l"
+#line 119 "decaf.l"
 { return make_token(T_INTLITERAL, current_line, yytext); }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 120 "decaf.l"
+#line 121 "decaf.l"
 {BEGIN(COMMENT);}
 	YY_BREAK
 case 42:
 /* rule 42 can match eol */
 YY_RULE_SETUP
-#line 121 "decaf.l"
+#line 122 "decaf.l"
 {BEGIN(INITIAL); current_line += 1; }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 122 "decaf.l"
+#line 123 "decaf.l"
 {}
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 124 "decaf.l"
+#line 125 "decaf.l"
 { BEGIN(MULTILINECOMMENT);
        start_line = current_line;}
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 126 "decaf.l"
+#line 127 "decaf.l"
 { BEGIN(INITIAL); }
 	YY_BREAK
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 127 "decaf.l"
+#line 128 "decaf.l"
 {current_line++;}
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 128 "decaf.l"
+#line 129 "decaf.l"
 {}
 	YY_BREAK
 case YY_STATE_EOF(MULTILINECOMMENT):
-#line 129 "decaf.l"
+#line 130 "decaf.l"
 {lex_error("Unenclosed block comment on line %d", start_line);}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 131 "decaf.l"
+#line 132 "decaf.l"
 { BEGIN(STRING); }
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 132 "decaf.l"
+#line 133 "decaf.l"
 { lex_error("Missing \" at the end of string literal"); }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 133 "decaf.l"
+#line 134 "decaf.l"
 { BEGIN(INITIAL);
              return make_token(T_STRINGLITERAL, current_line, string_content); }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 135 "decaf.l"
+#line 136 "decaf.l"
 { string_content = yytext; }
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 137 "decaf.l"
+#line 138 "decaf.l"
 {current_line++;}
 	YY_BREAK
 case 53:
 /* rule 53 can match eol */
 YY_RULE_SETUP
-#line 138 "decaf.l"
+#line 139 "decaf.l"
 {}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 140 "decaf.l"
+#line 141 "decaf.l"
 {lex_error("Unrecognized character");}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 141 "decaf.l"
+#line 142 "decaf.l"
 ECHO;
 	YY_BREAK
-#line 1437 "lex.yy.c"
+#line 1438 "lex.yy.c"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(COMMENT):
 			case YY_STATE_EOF(STRING):
@@ -2367,7 +2368,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 141 "decaf.l"
+#line 142 "decaf.l"
 
 
 

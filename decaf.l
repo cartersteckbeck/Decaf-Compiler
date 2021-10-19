@@ -79,7 +79,8 @@ false {return make_token(T_BOOLLITERAL, current_line, yytext); }
                         if (string_content == "string")
                             return make_token(T_STRING, current_line, yytext);
                         if (string_content == "class")
-                            return make_token(T_CLASS, current_line);
+                            { std::cout << "yyTEXT IS: " << yytext[7] << std::endl;
+                              return make_token(T_CLASS, current_line);}
                         if (string_content == "interface")
                             return make_token(T_INTERFACE, current_line);
                         if (string_content == "null")

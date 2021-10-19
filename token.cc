@@ -13,7 +13,7 @@ std::string token_name_array[] =
   "VOID", "INT", "DOUBLE", "BOOL", "STRING", "CLASS", "INTERFACE", "NULL",
   "THIS", "EXTENDS", "IMPLEMENTS", "FOR", "WHILE", "IF", "ELSE", "RETURN",
   "BREAK", "NEW", "NEWARRAY", "PRINT", "READINTEGER", "READLINE",
-  "<=", ">=", "==", "!=", "&&", "||", "ARRAY", "DBLLITERAL", "INTLITERAL",
+  "LE", "GE", "EQ", "NEQ", "AND", "OR", "ARRAY", "DBLLITERAL", "INTLITERAL",
   "BOOLLITERAL", "IDENTIFIER", "TYPEIDENTIFIER", "STRINGLITERAL"
 };
 

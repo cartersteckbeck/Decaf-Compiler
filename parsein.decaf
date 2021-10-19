@@ -42,9 +42,9 @@ int fact(int n)
   truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
 
 }
-//
-// /* Commented-out because it shouldn't parse. assignment and Relational
-//  operators do not associate in decaf. */
+
+/* Commented-out because it shouldn't parse. assignment and Relational
+ operators do not associate in decaf. */
 /*
 void shouldnotparse()
 {
@@ -66,11 +66,10 @@ void shouldparse()
 void matchedif()
 {
    if (a = b){
-      b = c;
+a = b;
    }
-   else{
-      c = b;
-   }
+   else
+c = b;
 }
 
 /* Added unmatched if */
@@ -95,95 +94,103 @@ int fact(int n)
    }
    return result;
 }
-//
-// /* Let's see how we do with matching else properly */
-// void fun()
-// {
-//    if (a == b)
-//       if (c == d)
-//          if (e == f) {
-//            if (g == h)
-//               x;
-//          }
-//          else
-//            y;
-// }
-//
-// /* and mixing if with while? */
-// void morefun()
-// {
-//    if (a1 == b1)
-//       while (c1 < d1)
-//          if (g1 == h1)
-//             x1;
-//    else
-//      y1; // fooled you! should match with inner if!
-//
-// // versus
-//    if (a2 == b2)
-//       while (c2 < d2) {
-//          if (g2 == h2)
-//             x2;
-//       }
-//          else
-//             y2; // matches outer if
-// }
-//
-// /* added for loops */
-// void forfun(int n) // get it?
-// {
-//    int i;
-//    int j;
-//    int k;
-//    int m;
-//    for (i = 0; i < n; i = i + 1)
-//       Print(i);
-//    for (j = 0; j < n;) // increment optional
-//    {
-//       Print(j);
-//       j = j + 1;
-//    }
-//    k = 0;
-//    for (;k < n; k = k + 1) // initialization optional
-//                           // (someone needs to add a ++ operator to decaf.)
-//    {
-//       Print(k);
-//    }
-//    m = 0;
-//    for (;m < n;) // both optional
-//    {
-//       Print(m);
-//       m = m + 1;
-//    }
-//    /* DOES NOT PARSE, condition is not optional
-//    for (;;)
-//      Print(n);
-// */
-//
-// }
-//
-// /* Added simple call (just ident, not field access yet) */
-// int fact(int n)
-// {
-//    if (n == 0)
-//       return 1;
-//    return n * fact(n - 1);
-// }
-//
-// /* added class declarations */
-// class boring
-// {
-//
-// }
-//
-// class multiinterface implements foo,bar,baz
-// {  int instanceVar;
-//    void print()
-//    {
-//      Print(instanceVar);
-//    }
-// }
-//
+
+ /* Let's see how we do with matching else properly */
+ void fun()
+ {
+    if (a == b)
+       if (c == d)
+          if (e == f) {
+            if (g == h)
+               x;
+          }
+         else
+           y;
+ }
+
+ void evenmorefun()
+ {
+    if (a == b)
+      { if (g == h)
+               x;
+      }
+         else
+           y;
+ }
+
+/* and mixing if with while? */
+void morefun()
+{
+   if (a1 == b1)
+      while (c1 < d1)
+         if (g1 == h1)
+            x1;
+   else
+     y1; // fooled you! should match with inner if!
+
+// versus
+   if (a2 == b2)
+      while (c2 < d2) {
+         if (g2 && h2 || a2 >= a2)
+            x2;
+      }
+         else
+            y2; // matches outer if
+}
+
+/* added for loops */
+void forfun(int n) // get it?
+{
+   int i;
+   int j;
+   int k;
+   int m;
+   for (i = 0; i < n; i = i + 1)
+      Print(i);
+   for (j = 0; j < n;) // increment optional
+   {
+      Print(j);
+      j = j + 1;
+   }
+   k = 0;
+   for (;k < n; k = k + 1) // initialization optional
+                          // (someone needs to add a ++ operator to decaf.)
+   {
+      Print(k);
+   }
+   m = 0;
+   for (;m < n;) // both optional
+   {
+      Print(m);
+      m = m + 1;
+   }
+   // DOES NOT PARSE, condition is not optional
+   // for (;;)
+   //   Print(n);
+}
+
+/* Added simple call (just ident, not field access yet) */
+int fact(int n)
+{
+  if (n == 0)
+     return 1;
+   return n + geq(n - 1);
+}
+
+/* added class declarations */
+class boring
+{
+
+}
+
+class multiinterface implements foo,bar,baz
+ {  int instanceVar;
+    void print()
+   {
+     Print(instanceVar);
+   }
+}
+
 // class umbrella extends thing implements toggleable
 // {
 //    bool closed;
@@ -207,7 +214,7 @@ int fact(int n)
 // and function declarations. */
 //
 // interface toggleable {
-//    void toggle();
+//    void toggle(int a);
 // }
 //
 // interface comparable {
