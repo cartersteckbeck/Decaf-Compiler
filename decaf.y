@@ -124,9 +124,9 @@ identifiersPlus: identifier[i] {$$ = new parse_tree("implements", 1, $i); }
 ext: extends identifier[i] {$$ = new parse_tree("extends", 1, $i); }
    | extends typeidentifier[i] {$$ = new parse_tree("extends", 1, $i); }
 
-call: identifier[i] '(' actuals[a] ')' {$$ = new parse_tree("call", 2, $i, $a);}
-    //| expr '.' identifier[i] '(' actuals[a] ')' {$$ = new parse_tree("call", 2, $i, $a);}
-            /* very problematic above */
+call: identifier[i] '(' nactuals[n] ')' {$$ = new parse_tree("call", 2, $i, $n);}
+    /* very problematic below */
+    /* | expr '.' identifier[i] '(' nactuals[a] ')' {$$ = new parse_tree("call", 2, $i, $a);} */
 
 
 /* Interface Declaractions */
@@ -154,7 +154,7 @@ matched_stmt: ';' {$$ = new parse_tree("nullstmt"); }
             | matched_if
             | matched_while
             | matched_for
-            | break ';' {$$ = new parse_tree("break", 1, $break); }
+            | break_stmt ';'
             | return_stmt ';'
             | print_stmt ';'
             | stmtblock
@@ -164,12 +164,13 @@ unmatched_stmt: unmatched_if
               | unmatched_for
 
 /* regular matched statements */
-print_stmt: print[p] '(' nactuals[n] ')' {$$ = new parse_tree("print", 2, $p, $n); }
+break_stmt: break {$$ = new parse_tree("break", 1, $break); }
 
 return_stmt: return {$$ = new parse_tree("return", 1, $return); }
            | return expr {$$ = new parse_tree("return", 2, $return, $expr); }
            | return call {$$ = new parse_tree("return", 2, $return, $call); }
 
+print_stmt: print[p] '(' actuals[a] ')' {$$ = new parse_tree("print", 2, $p, $a); }
 
 /* if statements */
 common_if: if '(' expr ')' {$$ = new parse_tree("if", 1, $expr); }
@@ -248,6 +249,7 @@ expr9: identifier
      | newarray '(' expr[e] ',' type[t] ')' {$$ = new parse_tree("newarray", 2, $e, $t);}
      | newarray '(' expr[e] ',' special[s] ')' {$$ = new parse_tree("newarray", 2, $e, $s);}
 
+/* you should explain special @Carter */
 special: identifier[i] {$$ = new parse_tree("usertype", 1, $i);}
 
 nactuals: /* empty */ {$$ = new parse_tree("actuals");}
