@@ -9,7 +9,7 @@ int retcon = 0;
 int bracket_start;
 %}
 
-FOLLOW [[:space:]]*[A-Za-z][A-Za-z0-9_]*|[[:space:]]*\[\]
+FOLLOW [[:space:]]+[A-Za-z][A-Za-z0-9_]*|[[:space:]]*\[\]
 DBLLITERAL [0-9]+\.[0-9]*([E|e][\+]?[0-9]+)?
 INTLITERAL [0-9]*|0[xX][a-fA-F0-9]+
 IDENTIFIER [A-Za-z][A-Za-z0-9_]*
@@ -79,7 +79,7 @@ false {return make_token(T_BOOLLITERAL, current_line, yytext); }
                         if (string_content == "string")
                             return make_token(T_STRING, current_line, yytext);
                         if (string_content == "class")
-                            return make_token(T_CLASS, current_line);
+                              return make_token(T_CLASS, current_line);
                         if (string_content == "interface")
                             return make_token(T_INTERFACE, current_line);
                         if (string_content == "null")
@@ -111,7 +111,7 @@ false {return make_token(T_BOOLLITERAL, current_line, yytext); }
                         if (string_content == "ReadInteger")
                             return make_token(T_READINTEGER, current_line);
                         if (string_content == "ReadLine")
-                            return make_token(T_READLINE, current_line); 
+                            return make_token(T_READLINE, current_line);
                         else
                           return make_token(T_TYPEIDENTIFIER, current_line, yytext);}
 {DBLLITERAL} { return make_token(T_DBLLITERAL, current_line, yytext); }

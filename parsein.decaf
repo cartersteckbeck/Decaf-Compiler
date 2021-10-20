@@ -33,7 +33,7 @@ int fact(int n)
   a.b;
   x = x + 1;
   x = x && y + z;
-  y || z || x;
+  x = y + x + z;
   y = x * x - y * y;
   a.b[a.b && c] = c;
   a[b[c]] = a.b;
@@ -42,9 +42,9 @@ int fact(int n)
   truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
 
 }
-//
-// /* Commented-out because it shouldn't parse. assignment and Relational
-//  operators do not associate in decaf. */
+
+/* Commented-out because it shouldn't parse. assignment and Relational
+ operators do not associate in decaf. */
 /*
 void shouldnotparse()
 {
@@ -66,10 +66,10 @@ void shouldparse()
 void matchedif()
 {
    if (a = b){
-	a = b;
+a = b;
    }
-   else 
-	c = b;
+   else
+c = b;
 }
 
 /* Added unmatched if */
@@ -94,7 +94,7 @@ int fact(int n)
    }
    return result;
 }
-//
+
  /* Let's see how we do with matching else properly */
  void fun()
  {
@@ -104,31 +104,41 @@ int fact(int n)
             if (g == h)
                x;
           }
-          else
-            y;
+         else
+           y;
  }
-//
-// /* and mixing if with while? */
-// void morefun()
-// {
-//    if (a1 == b1)
-//       while (c1 < d1)
-//          if (g1 == h1)
-//             x1;
-//    else
-//      y1; // fooled you! should match with inner if!
-//
-// // versus
-//    if (a2 == b2)
-//       while (c2 < d2) {
-//          if (g2 == h2)
-//             x2;
-//       }
-//          else
-//             y2; // matches outer if
-// }
-//
-// /* added for loops */
+
+ void evenmorefun()
+ {
+    if (a == b)
+      { if (g == h)
+               x;
+      }
+         else
+           y;
+ }
+
+/* and mixing if with while? */
+void morefun()
+{
+   if (a1 == b1)
+      while (c1 < d1)
+         if (g1 == h1)
+            x1;
+   else
+     y1; // fooled you! should match with inner if!
+
+// versus
+   if (a2 == b2)
+      while (c2 < d2) {
+         if (g2 && h2 || a2 >= a2)
+            x2;
+      }
+         else
+            y2; // matches outer if
+}
+
+/* added for loops */
 void forfun(int n) // get it?
 {
    int i;
@@ -154,94 +164,93 @@ void forfun(int n) // get it?
       Print(m);
       m = m + 1;
    }
-   /* DOES NOT PARSE, condition is not optional
-   for (;;)
-     Print(n);
-*/
+   // DOES NOT PARSE, condition is not optional
+   // for (;;)
+   //   Print(n);
 }
-//
-// /* Added simple call (just ident, not field access yet) */
-//int fact(int n)
-//{
-  // if (n == 0)
-     // return 1;
-   //return n + geq(n - 1);
-//}
-//
-// /* added class declarations */
+
+/* Added simple call (just ident, not field access yet) */
+int fact(int n)
+{
+  if (n == 0)
+     return 1;
+   return n + geq(n - 1);
+}
+
+/* added class declarations */
 class boring
 {
 
 }
-//
-//class multiinterface implements foo,bar,baz
- //{  int instanceVar;
-    // void print()
-   // {
-     // Print(instanceVar);
-   // }
-// }
-//
-// class umbrella extends thing implements toggleable
-// {
-//    bool closed;
-//
-//    void toggle()
-//    {
-//       closed = !closed;
-//    }
-//    void open()
-//    {
-//      closed = false;
-//    }
-//    void close()
-//    {
-//      closed = true;
-//    }
-// }
-//
-// /* Finished adding interfaces. Improved my grammar by declaring a
-// function_header non-terminal that can be used by both prototypes
-// and function declarations. */
-//
+
+class multiinterface implements foo,bar,baz
+ {  int instanceVar;
+    void print()
+   {
+     Print(instanceVar);
+   }
+}
+
+class umbrella extends thing implements toggleable
+{
+   bool closed;
+
+   void toggle()
+   {
+      closed = !closed;
+   }
+   void open()
+   {
+     closed = false;
+   }
+   void close()
+   {
+     closed = true;
+   }
+}
+
+/* Finished adding interfaces. Improved my grammar by declaring a
+function_header non-terminal that can be used by both prototypes
+and function declarations. */
+
 interface toggleable {
    void toggle(int a);
 }
-//
-// interface comparable {
-//    int compareTo(Object obj);
-// }
-//
-// /* Now back to finishing up expressions. */
-//
-// /* Field accesses, calls on complex expressions, array references */
-//
+
+interface comparable {
+   int compareTo(Object obj);
+}
+
+/* Now back to finishing up expressions. */
+
+/* Field accesses, calls on complex expressions, array references */
+
 // void reallyfun()
 // {
 //    x = thing.field;
 //    y = thing.fn(y);
 //    z = some.containedarray[45];
 //    a = b + c.d.e()[0];
-//    q = r.d(e())[0].f();
+//    q = r && b.d(e())[0].f();
 // }
-//
+
 // /* this and built-ins */
 //
-// void last()
-// {
-//    int x;
-//    string y;
-//    int [] a;
-//    umbrella [] u;
-//    x = this.y();
-//    a = NewArray(10, int);
-//    u = NewArray(11, umbrella); // note that it's ok for umbrella to be
-//                                // an IDENTIFIER rather than TYPEIDENTIFIER here.
-//    x = ReadInteger();
-//    y = ReadLine();
-//    for (x = 0; i < 11; x = x + 1)
-//       u[x] = New(umbrella);
-//    Print(a,b,fact(5)+1,d);  // multi-print has worked for a
-//                             // while, here is an example
-//    /* Print(); // doesn't compile. */
-// }
+void last()
+{
+   int x;
+   string y;
+   int [] a;
+   umbrella [] u;
+   x = this.y;
+   a = NewArray(10, int);
+   u = NewArray(11, umbrella); // note that it's ok for umbrella to be
+                               // an IDENTIFIER rather than TYPEIDENTIFIER here.
+   x = ReadInteger();
+   y = ReadLine();
+   for (x = 0; i < 11; x = x + 1)
+      u[x] = New(umbrella);
+   Print(a,b,fact(5)+1,d);  // multi-print has worked for a
+                            // while, here is an example
+    // Print(); // doesn't compile. */
+}
