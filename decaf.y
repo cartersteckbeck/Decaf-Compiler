@@ -125,11 +125,6 @@ identifiersPlus: identifier[i] {$$ = new parse_tree("implements", 1, $i); }
 ext: extends identifier[i] {$$ = new parse_tree("extends", 1, $i); }
    | extends typeidentifier[i] {$$ = new parse_tree("extends", 1, $i); }
 
-call: identifier[i] '(' nactuals[n] ')' {$$ = new parse_tree("call", 2, $i, $n);}
-    /* very problematic below */
-    /* | expr '.' identifier[i] '(' nactuals[a] ')' {$$ = new parse_tree("call", 2, $i, $a);} */
-
-
 /* Interface Declaractions */
 interfaceDecl: interface identifier[i] '{' prototypes[p] '}' {$$ = new parse_tree("interface", 2, $i, $p);}
 
@@ -202,10 +197,6 @@ unmatched_for: common_for unmatched_stmt[us] {$$ ->add_child($us); $$ = $common_
 
 
 //* Expressions */
-Lvalue: identifier
-      | expr1[inner] '[' expr1[inner2] ']' {$$ = new parse_tree("aref", 2, $inner, $inner2);}
-      | expr1[inner] '.' identifier[i] {$$ = new parse_tree("fieldaccess", 2, $inner, $i);}
-
 expr: expr1
     | Lvalue[a] sceq expr1[b] {$$ = new parse_tree("binop", 3, $a, $sceq, $b);}
 
@@ -235,11 +226,13 @@ expr6: expr7
      | expr6[inner] scmod expr7 {$$ = new parse_tree("binop", 3, $inner, $scmod, $expr7);}
 
 expr7: expr8
-     | scneq expr7[inner] {$$ = new parse_tree("uop", 2, $scneq, $expr7);}
-     | scminus expr7[inner] {$$ = new parse_tree("uop", 2, $scminus, $expr7);}
+     | scneq expr8[inner] {$$ = new parse_tree("uop", 2, $scneq, $expr7);}
+     | scminus expr8[inner] {$$ = new parse_tree("uop", 2, $scminus, $expr7);}
 
-expr8: Lvalue
-     | constant
+expr8: expr9
+     | Lvalue
+
+expr9: constant
      | this
      | '(' expr ')' { $$ = $expr; }
      | call
@@ -248,6 +241,12 @@ expr8: Lvalue
      | new '(' identifier[i] ')' {$$ = new parse_tree("new", 1, $i);}
      | newarray '(' expr[e] ',' type[t] ')' {$$ = new parse_tree("newarray", 2, $e, $t);}
      | newarray '(' expr[e] ',' special[s] ')' {$$ = new parse_tree("newarray", 2, $e, $s);}
+
+Lvalue: identifier
+      | expr8[e1] '[' expr1[e2] ']' {$$ = new parse_tree("aref", 2, $e1, $e2);}
+      | expr8[e1] '.' identifier[i] {$$ = new parse_tree("fieldaccess", 2, $e1, $i);}
+
+call: expr8[i] '(' nactuals[n] ')' {$$ = new parse_tree("call", 2, $i, $n);}
 
 /* you should explain special @Carter */
 special: identifier[i] {$$ = new parse_tree("usertype", 1, $i);}

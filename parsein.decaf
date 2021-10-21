@@ -23,25 +23,25 @@ int fact(int n) {
   break;
 }
 
-// /* Added expressions, but missing some base cases
-//    Here just identifiers and constants */
-// int fact(int n)
-// {
-//   int x;
-//   foo y;
-//   a + b;
-//   a.b;
-//   x = x + 1;
-//   x = x && y + z;
-//   x = y + x + z;
-//   y = x * x - y * y;
-//   a.b[a.b && c] = c;
-//   a[b[c]] = a.b;
-//   q.y[!b && a];
-//   truthy.b[!b + c && c] = a.y[b] / 8 < !b + c || d * - d;
-//   truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
-//
-// }
+/* Added expressions, but missing some base cases
+   Here just identifiers and constants */
+int fact(int n)
+{
+  int x;
+  foo y;
+  (a + b).c;
+  a().b.c.d();
+  x = x + 1;
+  x = x && y + z;
+  x = y + x + z;
+  y = x * x - y * y;
+  a.b[a.b && c] = c;
+  a[b[c]] = a.b;
+  q.y[!b && a];
+  truthy.b[!b && s + c && c] = a.y[b] / 8 < !b + c || d * - d;
+  truthy.a = a.y[bb] / 8 < !b + c || d && f * - d;
+
+}
 
 /* Commented-out because it shouldn't parse. assignment and Relational
  operators do not associate in decaf. */
@@ -225,14 +225,14 @@ interface comparable {
 
 /* Field accesses, calls on complex expressions, array references */
 
-// void reallyfun()
-// {
-//    x = thing.field;
-//    y = thing.fn(y);
-//    z = some.containedarray[45];
-//    a = b + c.d.e()[0];
-//    q = r && b.d(e())[0].f();
-// }
+void reallyfun()
+{
+   x = thing.field;
+   y = thing.fn(y);
+   z = some.containedarray[45];
+   a = b + c.d.e()[0];
+   q = r && b.d(e())[0].f();
+}
 
 /* this and built-ins */
 
