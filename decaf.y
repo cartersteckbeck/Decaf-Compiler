@@ -1,6 +1,7 @@
 /* These are the tokens.
    By convention (in CS 310) they have numbers starting with 260. Take care that
-   this list exactly matches the array of strings declared in token.cc. These tokens are only used for multi-character tokens. Single-character tokens
+   this list exactly matches the array of strings declared in token.cc. These
+   tokens are only used for multi-character tokens. Single-character tokens
    map to their characters directly.
 */
 // if(yytext.size() > 31)
@@ -168,7 +169,6 @@ break_stmt: break {$$ = new parse_tree("break", 1, $break); }
 
 return_stmt: return {$$ = new parse_tree("return", 1, $return); }
            | return expr {$$ = new parse_tree("return", 2, $return, $expr); }
-           | return call {$$ = new parse_tree("return", 2, $return, $call); }
 
 print_stmt: print[p] '(' actuals[a] ')' {$$ = new parse_tree("print", 2, $p, $a); }
 
@@ -201,9 +201,13 @@ matched_for: common_for matched_stmt[ms] {$$ ->add_child($ms); $$ = $common_for;
 unmatched_for: common_for unmatched_stmt[us] {$$ ->add_child($us); $$ = $common_for;}
 
 
-/* Expressions */
+//* Expressions */
+Lvalue: identifier
+      | expr1[inner] '[' expr1[inner2] ']' {$$ = new parse_tree("aref", 2, $inner, $inner2);}
+      | expr1[inner] '.' identifier[i] {$$ = new parse_tree("fieldaccess", 2, $inner, $i);}
+
 expr: expr1
-    | expr1[a] sceq expr1[b] {$$ = new parse_tree("binop", 3, $a, $sceq, $b);}
+    | Lvalue[a] sceq expr1[b] {$$ = new parse_tree("binop", 3, $a, $sceq, $b);}
 
 expr1: expr2
      | expr1[inner] or expr2 {$$ = new parse_tree("binop", 3, $inner, $or, $expr2);}
@@ -212,14 +216,14 @@ expr2: expr3
      | expr2[inner] and expr3 {$$ = new parse_tree("binop", 3, $inner, $and, $expr3);}
 
 expr3: expr4
-     | expr3[inner] eq expr4 {$$ = new parse_tree("binop", 3, $inner, $eq, $expr4);}
-     | expr3[inner] neq expr4 {$$ = new parse_tree("binop", 3, $inner, $neq, $expr4);}
+     | expr4[i1] eq expr4[i2] {$$ = new parse_tree("binop", 3, $i1, $eq, $i2);}
+     | expr4[i1] neq expr4[i2] {$$ = new parse_tree("binop", 3, $i1, $neq, $i2);}
 
 expr4: expr5
-     | expr4[inner] sclt expr5 {$$ = new parse_tree("binop", 3, $inner, $sclt, $expr5);}
-     | expr4[inner] scgt expr5 {$$ = new parse_tree("binop", 3, $inner, $scgt, $expr5);}
-     | expr4[inner] le expr5 {$$ = new parse_tree("binop", 3, $inner, $le, $expr5);}
-     | expr4[inner] ge expr5 {$$ = new parse_tree("binop", 3, $inner, $ge, $expr5);}
+     | expr5[i1] sclt expr5[i2] {$$ = new parse_tree("binop", 3, $i1, $sclt, $i2);}
+     | expr5[i1] scgt expr5[i2] {$$ = new parse_tree("binop", 3, $i1, $scgt, $i2);}
+     | expr5[i1] le expr5[i2] {$$ = new parse_tree("binop", 3, $i1, $le, $i2);}
+     | expr5[i1] ge expr5[i2] {$$ = new parse_tree("binop", 3, $i1, $ge, $i2);}
 
 expr5: expr6
      | expr5[inner] scplus expr6 {$$ = new parse_tree("binop", 3, $inner, $scplus, $expr6);}
@@ -231,14 +235,10 @@ expr6: expr7
      | expr6[inner] scmod expr7 {$$ = new parse_tree("binop", 3, $inner, $scmod, $expr7);}
 
 expr7: expr8
-     | scneq expr7[inner] {$$ = new parse_tree("uop", 2, $scneq, $inner);}
-     | scminus expr7[inner] {$$ = new parse_tree("uop", 2, $scminus, $inner);}
+     | scneq expr7[inner] {$$ = new parse_tree("uop", 2, $scneq, $expr7);}
+     | scminus expr7[inner] {$$ = new parse_tree("uop", 2, $scminus, $expr7);}
 
-expr8: expr9
-     | expr8[inner] '[' expr1[inner2] ']' {$$ = new parse_tree("aref", 2, $inner, $inner2);}
-     | expr8[inner] '.' identifier[i] {$$ = new parse_tree("fieldaccess", 2, $inner, $i);}
-
-expr9: identifier
+expr8: Lvalue
      | constant
      | this
      | '(' expr ')' { $$ = $expr; }
