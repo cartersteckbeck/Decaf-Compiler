@@ -29,7 +29,7 @@ int fact(int n)
 {
   int x;
   foo y;
-  (a + b).c;
+  a.b();
   a().b.c.d();
   x = x + 1;
   x = x && y + z;

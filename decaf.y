@@ -226,8 +226,8 @@ expr6: expr7
      | expr6[inner] scmod expr7 {$$ = new parse_tree("binop", 3, $inner, $scmod, $expr7);}
 
 expr7: expr8
-     | scneq expr8[inner] {$$ = new parse_tree("uop", 2, $scneq, $expr7);}
-     | scminus expr8[inner] {$$ = new parse_tree("uop", 2, $scminus, $expr7);}
+     | scneq expr7[inner] {$$ = new parse_tree("uop", 2, $scneq, $inner);}
+     | scminus expr7[inner] {$$ = new parse_tree("uop", 2, $scminus, $inner);}
 
 expr8: expr9
      | Lvalue
@@ -252,8 +252,7 @@ call: expr8[i] '(' nactuals[n] ')' {$$ = new parse_tree("call", 2, $i, $n);}
 special: identifier[i] {$$ = new parse_tree("usertype", 1, $i);}
 
 nactuals: /* empty */ {$$ = new parse_tree("actuals");}
-        | nactuals expr {$1->add_child($2); $$ = $1;}
-        | nactuals ',' expr {$1->add_child($expr); $$ = $1;}
+        | actuals
 
 actuals: expr {$$ = new parse_tree("actuals", 1, $expr);}
        | actuals ',' expr {$1->add_child($expr); $$ = $1;}
