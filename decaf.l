@@ -69,13 +69,13 @@ false {return make_token(T_BOOLLITERAL, current_line, yytext); }
                         if (string_content == "void")
                             return make_token(T_VOID, current_line);
                         if (string_content == "int")
-                            return make_token(T_INT, current_line);
+                            return make_token(T_INT, current_line, yytext);
                         if (string_content == "true" || string_content == "false")
                             return make_token(T_BOOLLITERAL, current_line, yytext);
                         if (string_content == "double")
-                            return make_token(T_DOUBLE, current_line);
+                            return make_token(T_DOUBLE, current_line, yytext);
                         if (string_content == "bool")
-                            return make_token(T_BOOL, current_line);
+                            return make_token(T_BOOL, current_line, yytext);
                         if (string_content == "string")
                             return make_token(T_STRING, current_line, yytext);
                         if (string_content == "class")

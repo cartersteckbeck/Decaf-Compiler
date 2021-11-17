@@ -1,12 +1,3 @@
-/* These are the tokens.
-   By convention (in CS 310) they have numbers starting with 260. Take care that
-   this list exactly matches the array of strings declared in token.cc. These
-   tokens are only used for multi-character tokens. Single-character tokens
-   map to their characters directly.
-*/
-// if(yytext.size() > 31)
-//                  lex_error("Identifier %s too long", yytext);
-//              else
 %token T_VOID 260 "void"
 %token T_INT 261 "int"
 %token T_DOUBLE 262 "double"
@@ -59,21 +50,238 @@ int yyerror(char const *s)
    exit(1);
 }
 
+bool ensure_top_scope()
+{
+  return current_class == nullptr &&
+         current_interface == nullptr &&
+         current_function == nullptr;
+}
+
+void func_p1(parse_tree* i, parse_tree* t)
+{
+  std::string ident = i->tok->text;
+  semantic_assert(!current_scope->lookup_local(ident),
+                  "\"%s\" is already defined",
+                  ident.c_str());
+
+  current_function = new s_function(ident);
+  semantics *type = nullptr;
+  std::string typestr;
+
+  if (t->description == "arraytype")
+  {
+    typestr = t->children[0]->children[0]->tok->text;
+    type = current_scope->lookup(typestr);
+  }
+  else if (t->type->to_string() == "void")
+  {
+    typestr = "void";
+    type = semantics_void_type;
+  }
+  else if (t->children.size() == 0)
+  {
+    typestr = t->tok->text;
+    type = current_scope->lookup(typestr);
+  }
+  else
+  {
+    typestr = t->children[0]->tok->text;
+    type = current_scope->lookup(typestr);
+  }
+
+  if (!type)
+  {
+    s_class *undefined_class = new s_class(typestr);
+    undefined_class->defined = false;
+    current_scope->add(typestr, undefined_class);
+    type = undefined_class;
+  }
+
+  current_function->return_type = dynamic_cast<s_type*>(type);
+  current_scope->add(ident, current_function);
+}
+
+void func_p2()
+{
+  if(current_class)
+      current_class->function_map.insert({current_function->name, current_function});
+  current_function = nullptr;
+}
+
+void class_p1(parse_tree* a)
+/* Checks if class ident exists, whether its actually a class,
+   and if so whether its defined, producing the correct errors
+   for each case. */
+{
+  std::string new_class_ident = a->tok->text;
+  current_class = new s_class(new_class_ident);
+
+  if (current_scope->lookup(new_class_ident))
+    if (dynamic_cast<s_class *>(current_scope->lookup(new_class_ident)))
+      if (dynamic_cast<s_class *>(current_scope->lookup(new_class_ident))->defined)
+        semantic_assert(false,
+                        "\"%s\" is redefining an existing class",
+                        new_class_ident.c_str());
+      else
+      {
+        current_class = dynamic_cast<s_class *>(current_scope->lookup(new_class_ident));
+        current_class->defined = true;
+      }
+    else
+      semantic_assert(false,
+                      "\"%s\" is already defined as a different type",
+                      new_class_ident.c_str());
+  else
+    current_scope->add(new_class_ident, current_class);
+}
+
+void class_extends(parse_tree* a, parse_tree* ext)
+/* Runs class_p1 to check the same stuff for new class. Then
+   checks if parent ident exists, whether its actually a class,
+   and if so whether its defined, producing the correct errors
+   for each case. If its not defined yet, add it to the top scope
+   and make sure its defined at some point later in pass 1.5. */
+{
+    class_p1(a);
+
+    std::string parent_class_ident = ext->children[0]->tok->text;
+    semantics *parent_class = current_scope->lookup(parent_class_ident);
+
+    if (parent_class && dynamic_cast<s_class*>(parent_class))
+        current_class->superclass = dynamic_cast<s_class*>(parent_class);
+    else if (parent_class)
+        semantic_assert(false,
+                        "cannot extend non-class \"%s\"",
+                        parent_class_ident.c_str());
+    else {
+        s_class *new_class = new s_class(parent_class_ident);
+        new_class->defined = false;
+        current_class->superclass = new_class;
+        current_scope->add(parent_class_ident, new_class);
+   }
+}
+
+void identifierplus_p1(parse_tree* i)
+/* Checks if interface ident exists, whether its actually an interface,
+   producing the correct errors for each case. If its not defined yet,
+   add it to the top scope and make sure its defined at some point later
+   in pass 1.5. */
+{
+  std::string interface_ident = i->tok->text;
+  semantics *curr_interface = current_scope->lookup(interface_ident);
+
+  if (curr_interface && dynamic_cast<s_interface*>(curr_interface))
+    current_class->interfaces.push_back(dynamic_cast<s_interface*>(curr_interface));
+  else if (curr_interface)
+      semantic_assert(false,
+                "cannot implement non-interface \"%s\"",
+                interface_ident.c_str());
+  else {
+      s_interface *new_interface = new s_interface(interface_ident);
+      new_interface->defined = false;
+      current_scope->add(interface_ident, new_interface);
+      current_class->interfaces.push_back(new_interface);
+  }
+}
+
+void variable_p1(parse_tree* type, parse_tree* identifier)
+{
+  /* make sure ident not defined locally. */
+  std::string ident = identifier->tok->text;
+  semantic_assert(!current_scope->lookup_local(ident),
+                  "\"%s\" is already defined",
+                  ident.c_str());
+
+  /* find type */
+  std::string typestr;
+  if (type->description == "arraytype")
+    typestr = type->children[0]->children[0]->tok->text;
+  else
+    typestr = type->children[0]->tok->text;
+
+  semantics *existing_type = current_scope->lookup(typestr);
+
+  /* create variable */
+  s_var *new_var = new s_var(ident, dynamic_cast<s_type *>(existing_type));
+
+  /* if undefined type, add to scope with defined=false */
+  if (!existing_type)
+  {
+    s_class *undefined_class = new s_class(typestr);
+    undefined_class->defined = false;
+    current_scope->add(typestr, undefined_class);
+  }
+
+  current_scope->add(ident, new_var);
+
+  /* add declared variables to parameter maps
+     if inside a function or prototype. */
+  if(current_prototype)
+      current_prototype->params.push_back(new_var);
+  if(current_function)
+      current_function->params.push_back(new_var);
+  if (current_class)
+    current_class->locals.push_back(new_var);
+}
+
+void interface_p1(parse_tree* interface, parse_tree* identifier)
+{
+  std::string interface_ident = identifier->tok->text;
+  semantics *existing_interface = current_scope->lookup(interface_ident);
+  current_interface = new s_interface(interface_ident);
+
+  if (existing_interface)
+    if(dynamic_cast<s_interface*> (existing_interface))
+        if(dynamic_cast<s_interface*>(existing_interface)->defined)
+          semantic_assert(false,
+                          "\"%s\" is already a defined interface",
+                          interface_ident.c_str());
+        else
+          current_scope->replace(interface_ident, current_interface);
+    else
+      semantic_assert(false,
+                      "\"%s\" is already defined",
+                      interface_ident.c_str());
+  else
+    current_scope->add(interface_ident, current_interface);
+}
+
+void prototypes_p1(parse_tree* type, parse_tree* identifier)
+{
+  std::string ident = identifier->tok->text;
+  semantic_assert(!current_scope->lookup_local(ident),
+                  "\"%s\" is already defined",
+                  ident.c_str());
+
+  current_prototype = new s_prototype(ident);
+  std::string typestr;
+
+  if (type->description == "arraytype")
+    typestr = type->children[0]->children[0]->tok->text;
+  else
+    typestr = type->children[0]->tok->text;
+
+  semantics *existing_type = current_scope->lookup(typestr);
+  if (!existing_type){
+      s_class *undefined_class = new s_class(typestr);
+      undefined_class->defined = false;
+      current_scope->add(typestr, undefined_class);
+  }
+  current_prototype->return_type = dynamic_cast<s_type*>(existing_type);
+  current_scope->add(ident, current_prototype);
+}
+
 %}
 
 %define parse.error verbose
 
 %%
 
-/* Debugging hint: if you want to test part of the grammar in isolation,
-* change this line rather than using the %start directive from yacc/bison.
-* (Crucially, this line sets the "top" variable.)
-*/
-pgm: program {top = $$ = $1; }
+pgm: program {top = $$ = $1;}
 
 
 /* Language grammar follows: */
-program: decl {$$ = $1; }
+program: decl {$$ = $1;}
 
 decl: /* empty */ {$$ = new parse_tree("program"); }
     | decl varDecl {$1->add_child($2); $$ = $1; }
@@ -85,7 +293,8 @@ decl: /* empty */ {$$ = new parse_tree("program"); }
 /* Variable Declarations */
 varDecl: variable ';'
 
-variable: type identifier {$$ = new parse_tree("variable", 2, $type, $identifier); }
+variable: type identifier { variable_p1($type, $identifier); //semantic checking
+                            $$ = new parse_tree("variable", 2, $type, $identifier); }
 
 type: usertype | primtype | arraytype
 
@@ -99,40 +308,86 @@ primtype: string {$$ = new parse_tree("primtype", 1, $string); }
 arraytype: usertype array {$$ = new parse_tree("arraytype", 1, $usertype); }
          | primtype array {$$ = new parse_tree("arraytype", 1, $primtype); }
 
-
 /* Function Declarations */
-funcDecl: type identifier[i] '(' formals[f] ')' stmtblock[s] {$$ = new parse_tree("functiondecl", 4, $type, $i, $f, $s); }
-        | void identifier[i] '(' formals[f] ')' stmtblock[s] {$$ = new parse_tree("functiondecl", 4, $void, $i, $f, $s); }
+funcDecl: type[t] identifier[i] { func_p1($i, $t); open_scope(); }
+          '(' formals[f] ')' { close_scope(); func_p2(); open_scope(); }
+          stmtblock[s] { close_scope(); $$ = new parse_tree("functiondecl", 4, $t, $i, $f, $s); }
+
+        | void[t] identifier[i] { func_p1($i, $t); open_scope(); }
+          '(' formals[f] ')' { close_scope(); func_p2(); open_scope(); }
+          stmtblock[s] { close_scope(); $$ = new parse_tree("functiondecl", 4, $t, $i, $f, $s); }
 
 formals: /* empty */ {$$ = new parse_tree("formals"); }
        | formals[f] variable[v] {$f->add_child($v); $$ = $1; }
        | formals[f] ',' variable[v] {$f->add_child($v); $$ = $1; }
 
-
 /* Class Declarations */
-classDecl: class identifier[a] '{' fields '}' {$$ = new parse_tree("class", 4, $a, nullptr, nullptr, $fields);}
-         | class typeidentifier[a] ext '{' fields '}' {$$ = new parse_tree("class", 4, $a, $ext, nullptr, $fields);}
-         | class typeidentifier[a] implements identifiersPlus[ip] '{' fields '}' {$$ = new parse_tree("class", 4, $a, nullptr, $ip, $fields);}
-         | class typeidentifier[a] ext implements identifiersPlus[ip] '{' fields '}' {$$ = new parse_tree("class", 4, $a, $ext, $ip, $fields);}
+classDecl: class identifier[a] { class_p1($a); open_scope(); }
+           '{' fields '}' { close_scope();
+                            current_class = nullptr;
+                            $$ = new parse_tree("class", 4, $a, nullptr, nullptr, $fields); }
 
+         | class typeidentifier[a] ext { class_extends($a, $ext); open_scope(); }
+           '{' fields '}' { close_scope();
+                            current_class = nullptr;
+                            $$ = new parse_tree("class", 4, $a, $ext, nullptr, $fields); }
+
+         | class typeidentifier[a] { class_p1($a); }
+           implements identifiersPlus[ip] { open_scope(); }
+           '{' fields '}' { close_scope();
+                            current_class = nullptr;
+                            $$ = new parse_tree("class", 4, $a, nullptr, $ip, $fields); }
+
+         | class typeidentifier[a] ext { class_extends($a, $ext); }
+           implements identifiersPlus[ip] { open_scope(); }
+           '{' fields '}' { close_scope();
+                            current_class = nullptr;
+                            $$ = new parse_tree("class", 4, $a, $ext, $ip, $fields); }
+
+/* Handles variable declarations and function declarations
+   within class declarations. */
 fields: /* empty */ {$$ = new parse_tree("fields");}
       | fields funcDecl {$1->add_child($2); $$ = $1; }
       | fields varDecl {$1->add_child($2); $$ = $1; }
 
-identifiersPlus: identifier[i] {$$ = new parse_tree("implements", 1, $i); }
-               | identifiersPlus ',' identifier[i] {$1->add_child($i); $$ = $1; }
+/* Handles class-implemented interfaces */
+identifiersPlus: identifier[i] { identifierplus_p1($i);
+                                 $$ = new parse_tree("implements", 1, $i); }
+               | identifiersPlus ',' identifier[i] { identifierplus_p1($i);
+                                                     $1->add_child($i); $$ = $1; }
 
-ext: extends identifier[i] {$$ = new parse_tree("extends", 1, $i); }
+ext: extends identifier[i] { $$ = new parse_tree("extends", 1, $i); }
    | extends typeidentifier[i] {$$ = new parse_tree("extends", 1, $i); }
 
 /* Interface Declaractions */
-interfaceDecl: interface identifier[i] '{' prototypes[p] '}' {$$ = new parse_tree("interface", 2, $i, $p);}
+interfaceDecl: interface identifier[i] { interface_p1($interface, $i); open_scope(); }
+               '{' prototypes[p] '}' { close_scope();
+                                       current_interface = nullptr;
+                                       $$ = new parse_tree("interface", 2, $i, $p); }
 
 prototypes: /* empty */ {$$ = new parse_tree("prototypes");}
           | prototypes prototype {$1->add_child($2); $$ = $1; }
 
-prototype: type identifier[i] '(' formals[f] ')' ';' {$$ = new parse_tree("prototype", 3, $type, $i, $f); }
-         | void identifier[i] '(' formals[f] ')' ';' {$$ = new parse_tree("prototype", 3, $void, $i, $f); }
+prototype: type identifier[i] { prototypes_p1($type, $i); open_scope(); }
+           '(' formals[f] ')' ';'  { close_scope();
+                                     current_interface->prototype_map.insert({current_prototype->name, current_prototype});
+                                     current_prototype = nullptr;
+                                     $$ = new parse_tree("prototype", 3, $type, $i, $f); }
+         | void identifier[i] { std::string ident = $i->tok->text;
+                                semantic_assert(!current_scope->lookup_local(ident),
+                                                "\"%s\" is already defined",
+                                                ident.c_str());
+
+                                current_prototype = new s_prototype(ident);
+                                semantics *type = current_scope->lookup($void->tok->text);
+                                current_prototype->return_type = dynamic_cast<s_type*>(type);
+                                current_scope->add(ident, current_prototype);
+
+                                open_scope(); }
+           '(' formals[f] ')' ';' { close_scope();
+                                    current_interface->prototype_map.insert({current_prototype->name, current_prototype});
+                                    current_prototype = nullptr;
+                                    $$ = new parse_tree("prototype", 3, $void, $i, $f); }
 
 /* Statements */
 stmtblock: '{' varDeclStar[v] stmtStar[s] '}' {$$ = new parse_tree("stmtblock", 2, $v, $s);}
@@ -176,7 +431,6 @@ unmatched_if: common_if matched_stmt[ms]                         {$$->add_child(
             | common_if matched_stmt[ms] else unmatched_stmt[us] {$$->add_child($ms); $$->add_child($us); $$ = $common_if; }
             | common_if unmatched_stmt[us]                       {$$->add_child($us); $$->add_child(nullptr); $$ = $common_if; }
 
-
 /* while statements */
 common_while: while '(' expr1 ')' {$$ = new parse_tree("while", 1, $expr1); }
 
@@ -194,7 +448,6 @@ common_for: for '(' expr[a] ';' expr[b] ';' expr[c] ')' {$$ = new parse_tree("fo
 matched_for: common_for matched_stmt[ms] {$$ ->add_child($ms); $$ = $common_for;}
 
 unmatched_for: common_for unmatched_stmt[us] {$$ ->add_child($us); $$ = $common_for;}
-
 
 //* Expressions */
 expr: expr1
@@ -271,7 +524,7 @@ int: T_INT { $$ = new parse_tree(mytok); }
 double: T_DOUBLE { $$ = new parse_tree(mytok); }
 bool: T_BOOL { $$ = new parse_tree(mytok); }
 array: T_ARRAY { $$ = new parse_tree(mytok); }
-void: T_VOID { $$ = new parse_tree(mytok); }
+void: T_VOID { $$ = new parse_tree(mytok); $$->type = semantics_void_type; }
 break: T_BREAK { $$ = new parse_tree(mytok); }
 this: T_THIS { $$ = new parse_tree(mytok); }
 le: T_LE { $$ = new parse_tree(mytok); }
@@ -283,10 +536,10 @@ or: T_OR { $$ = new parse_tree(mytok); }
 readint: T_READINTEGER { $$ = new parse_tree(mytok); }
 new: T_NEW { $$ = new parse_tree(mytok); }
 newarray: T_NEWARRAY { $$ = new parse_tree(mytok); }
-intlit: T_INTLITERAL { $$ = new parse_tree(mytok); }
-dbllit: T_DBLLITERAL { $$ = new parse_tree(mytok); }
-boollit: T_BOOLLITERAL { $$ = new parse_tree(mytok); }
-stringlit: T_STRINGLITERAL { $$ = new parse_tree(mytok); }
+intlit: T_INTLITERAL { $$ = new parse_tree(mytok);  $$->type = semantics_int_type; }
+dbllit: T_DBLLITERAL { $$ = new parse_tree(mytok); $$->type = semantics_double_type; }
+boollit: T_BOOLLITERAL { $$ = new parse_tree(mytok); $$->type = semantics_bool_type; }
+stringlit: T_STRINGLITERAL { $$ = new parse_tree(mytok); $$->type = semantics_string_type; }
 null: T_NULL { $$ = new parse_tree(mytok); }
 readline: T_READLINE { $$ = new parse_tree(mytok); }
 if: T_IF { $$ = new parse_tree(mytok); }
@@ -311,15 +564,5 @@ sclt: '<' { $$ = new parse_tree(mytok); }
 scgt: '>' { $$ = new parse_tree(mytok); }
 sceq: '=' { $$ = new parse_tree(mytok); }
 scneq: '!' { $$ = new parse_tree(mytok); }
-//sccolon: ';' { $$ = new parse_tree(mytok); }
-//sccomma: ',' { $$ = new parse_tree(mytok); }
-//scperiod: '.' { $$ = new parse_tree(mytok); }
-//sclbracket: '[' { $$ = new parse_tree(mytok); }
-//scrbracket: ']' { $$ = new parse_tree(mytok); }
-//sclparen: '(' { $$ = new parse_tree(mytok); }
-//scrparen: ')' { $$ = new parse_tree(mytok); }
-//sclcurly: '{' { $$ = new parse_tree(mytok); }
-//scrcurly: '}' { $$ = new parse_tree(mytok); }
-//scbackslash: '\\' { $$ = new parse_tree(mytok); }
 
 %%

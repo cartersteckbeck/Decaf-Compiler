@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 /* *** semantic_assert ***
 Given a boolean condition, a format string, and other parameters,
@@ -12,7 +13,6 @@ pass the format string and other parameters to
 fprintf (on stderr), output a newline, and exit the compiler.
 */
 void semantic_assert(bool condition, char const *fmt, ...);
-
 
 /* Part I - data structures for ascribing semantics to program elements */
 
@@ -34,6 +34,13 @@ struct s_type: public semantics
    s_type(std::string name);
 };
 
+struct s_arraytype: public s_type
+{
+   s_type *content_type;
+   s_arraytype(s_type *);
+};
+
+
 // Room here for s_type subclass declarations, including placeholder.
 // ..........
 
@@ -42,13 +49,6 @@ struct s_prim: public s_type
    virtual std::string to_string() const;
    s_prim(std::string name);
 };
-
-
-// classes
-struct s_class: public s_type
-{
-};
-
 
 // variables & parameters
 struct s_var: public semantics
@@ -59,6 +59,71 @@ struct s_var: public semantics
    std::string to_string() const;
 };
 
+
+// Prototypes and functions. Functions are a subclass of Prototype because they
+// also have a body, local variables, might belong to a class.
+
+// Needed forward declarations
+struct s_class;
+struct s_interface;
+
+struct s_prototype: public semantics
+{
+   // parameter list
+   std::vector<s_var *> params;
+   std::string name;
+   s_prototype(std::string name);
+   std::string to_string() const;
+   // return type (nullptr == void)
+   s_type *return_type;
+};
+
+struct s_function: public s_prototype
+{
+
+   // class it belongs to, if any:
+   s_class * owner_class;
+   s_function(std::string name);
+   std::string to_string() const;
+   // list of local variables
+   std::vector<s_var *> locals;
+};
+
+// user types (classes & interfaces)
+
+struct s_usertype:public s_type
+{
+   bool defined;
+   s_usertype(std::string);
+   std::string to_string() const;
+};
+
+// classes
+struct s_class: public s_usertype
+{
+   // map of function name to s_function
+   std::map<std::string, s_function *> function_map;
+
+   // link to superclass (nullptr = does not extend something)
+   s_class *superclass;
+
+   // vector of interfaces
+   std::vector<s_interface *> interfaces;
+
+   // list of local variables
+   std::vector<s_var *> locals;
+
+   s_class(std::string);
+};
+
+// interfaces
+struct s_interface: public s_usertype
+{
+   // map of function name to prototype
+   std::map<std::string, s_prototype *> prototype_map;
+   s_interface(std::string);
+
+};
 
 /* ---------- PART II,  symbol table (declaration scope) -------------------*/
 
@@ -108,6 +173,24 @@ public:
    // constructor
    symtab(symtab *outer);
 
+   void print_symbol_table() const;
+
+   void print_undefined_types() const;
+
+   void check_undefined_usertypes() const;
+
+   void check_interface_implement() const;
+
+   void check_cyclic_classes() const;
+
+   bool cyclic_classes_helper(s_class* c, std::vector<s_class*> seen_classes) const;
+
+   void check_method_override() const;
+
+   bool check_method_helper(s_class* current_class, s_class * superclass) const;
+
+   void print_classes() const;
+
    // GETTERS:
 
    // name getter
@@ -135,12 +218,17 @@ public:
 /**** Variables ***/
 
 extern symtab *current_scope;
+extern symtab *top_scope;
 // These will be used later, perhaps
-extern semantics *current_class;
-extern semantics *current_interface;
-extern semantics *current_function;
+extern s_class *current_class;
+extern s_interface *current_interface;
+extern s_function *current_function;
+extern s_prototype *current_prototype;
 extern s_prim *semantics_int_type;
 extern s_prim *semantics_double_type;
+extern s_prim *semantics_bool_type;
+extern s_prim *semantics_string_type;
+extern s_prim *semantics_void_type;
 
 /*** Functions ***/
 
@@ -154,6 +242,5 @@ symtab *close_scope();
 
 // issues a semantic error and exits.
 void semantic_error(std::string const & msg);
-
 
 #endif
