@@ -67,28 +67,21 @@ void func_p1(parse_tree* i, parse_tree* t)
   current_function = new s_function(ident);
   semantics *type = nullptr;
   std::string typestr;
-
   if (t->description == "arraytype")
   {
     typestr = t->children[0]->children[0]->tok->text;
     type = current_scope->lookup(typestr);
   }
-  else if (t->type->to_string() == "void")
-  {
-    typestr = "void";
-    type = semantics_void_type;
-  }
   else if (t->children.size() == 0)
   {
-    typestr = t->tok->text;
+    typestr = "void";
     type = current_scope->lookup(typestr);
   }
-  else
+  else 
   {
     typestr = t->children[0]->tok->text;
     type = current_scope->lookup(typestr);
   }
-
   if (!type)
   {
     s_class *undefined_class = new s_class(typestr);
@@ -96,7 +89,6 @@ void func_p1(parse_tree* i, parse_tree* t)
     current_scope->add(typestr, undefined_class);
     type = undefined_class;
   }
-
   current_function->return_type = dynamic_cast<s_type*>(type);
   current_scope->add(ident, current_function);
 }
@@ -310,12 +302,12 @@ arraytype: usertype array {$$ = new parse_tree("arraytype", 1, $usertype); }
 
 /* Function Declarations */
 funcDecl: type[t] identifier[i] { func_p1($i, $t); open_scope(); }
-          '(' formals[f] ')' { close_scope(); func_p2(); open_scope(); }
-          stmtblock[s] { close_scope(); $$ = new parse_tree("functiondecl", 4, $t, $i, $f, $s); }
+          '(' formals[f] ')' { open_scope(); func_p2();}
+          stmtblock[s] { close_scope(); close_scope(); $$ = new parse_tree("functiondecl", 4, $t, $i, $f, $s); }
 
         | void[t] identifier[i] { func_p1($i, $t); open_scope(); }
-          '(' formals[f] ')' { close_scope(); func_p2(); open_scope(); }
-          stmtblock[s] { close_scope(); $$ = new parse_tree("functiondecl", 4, $t, $i, $f, $s); }
+          '(' formals[f] ')' { open_scope(); func_p2();}
+          stmtblock[s] { close_scope(); close_scope(); $$ = new parse_tree("functiondecl", 4, $t, $i, $f, $s); }
 
 formals: /* empty */ {$$ = new parse_tree("formals"); }
        | formals[f] variable[v] {$f->add_child($v); $$ = $1; }

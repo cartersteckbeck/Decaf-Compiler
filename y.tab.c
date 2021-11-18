@@ -101,28 +101,21 @@ void func_p1(parse_tree* i, parse_tree* t)
   current_function = new s_function(ident);
   semantics *type = nullptr;
   std::string typestr;
-
   if (t->description == "arraytype")
   {
     typestr = t->children[0]->children[0]->tok->text;
     type = current_scope->lookup(typestr);
   }
-  else if (t->type->to_string() == "void")
-  {
-    typestr = "void";
-    type = semantics_void_type;
-  }
   else if (t->children.size() == 0)
   {
-    typestr = t->tok->text;
+    typestr = "void";
     type = current_scope->lookup(typestr);
   }
-  else
+  else 
   {
     typestr = t->children[0]->tok->text;
     type = current_scope->lookup(typestr);
   }
-
   if (!type)
   {
     s_class *undefined_class = new s_class(typestr);
@@ -130,7 +123,6 @@ void func_p1(parse_tree* i, parse_tree* t)
     current_scope->add(typestr, undefined_class);
     type = undefined_class;
   }
-
   current_function->return_type = dynamic_cast<s_type*>(type);
   current_scope->add(ident, current_function);
 }
@@ -306,7 +298,7 @@ void prototypes_p1(parse_tree* type, parse_tree* identifier)
 }
 
 
-#line 310 "y.tab.c"
+#line 302 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -955,25 +947,25 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   280,   280,   284,   286,   287,   288,   289,   290,   294,
-     296,   299,   299,   299,   301,   303,   304,   305,   306,   308,
-     309,   312,   313,   312,   316,   317,   316,   320,   321,   322,
-     325,   325,   330,   330,   335,   336,   335,   341,   342,   341,
-     349,   350,   351,   354,   356,   359,   360,   363,   363,   368,
-     369,   371,   371,   376,   376,   393,   395,   396,   398,   399,
-     401,   401,   403,   404,   405,   406,   407,   408,   409,   410,
-     411,   413,   414,   415,   418,   420,   421,   423,   426,   428,
-     430,   431,   432,   435,   437,   439,   443,   444,   445,   446,
-     448,   450,   453,   454,   456,   457,   459,   460,   462,   463,
-     464,   466,   467,   468,   469,   470,   472,   473,   474,   476,
-     477,   478,   479,   481,   482,   483,   485,   486,   488,   489,
-     490,   491,   492,   493,   494,   495,   496,   498,   499,   500,
-     502,   505,   507,   508,   510,   511,   513,   514,   515,   516,
-     517,   520,   521,   522,   523,   524,   525,   526,   527,   528,
-     529,   530,   531,   532,   533,   534,   535,   536,   537,   538,
-     539,   540,   541,   542,   543,   544,   545,   546,   547,   548,
-     549,   550,   551,   552,   553,   554,   558,   559,   560,   561,
-     562,   563,   564,   565,   566
+       0,   272,   272,   276,   278,   279,   280,   281,   282,   286,
+     288,   291,   291,   291,   293,   295,   296,   297,   298,   300,
+     301,   304,   305,   304,   308,   309,   308,   312,   313,   314,
+     317,   317,   322,   322,   327,   328,   327,   333,   334,   333,
+     341,   342,   343,   346,   348,   351,   352,   355,   355,   360,
+     361,   363,   363,   368,   368,   385,   387,   388,   390,   391,
+     393,   393,   395,   396,   397,   398,   399,   400,   401,   402,
+     403,   405,   406,   407,   410,   412,   413,   415,   418,   420,
+     422,   423,   424,   427,   429,   431,   435,   436,   437,   438,
+     440,   442,   445,   446,   448,   449,   451,   452,   454,   455,
+     456,   458,   459,   460,   461,   462,   464,   465,   466,   468,
+     469,   470,   471,   473,   474,   475,   477,   478,   480,   481,
+     482,   483,   484,   485,   486,   487,   488,   490,   491,   492,
+     494,   497,   499,   500,   502,   503,   505,   506,   507,   508,
+     509,   512,   513,   514,   515,   516,   517,   518,   519,   520,
+     521,   522,   523,   524,   525,   526,   527,   528,   529,   530,
+     531,   532,   533,   534,   535,   536,   537,   538,   539,   540,
+     541,   542,   543,   544,   545,   546,   550,   551,   552,   553,
+     554,   555,   556,   557,   558
 };
 #endif
 
@@ -2069,305 +2061,305 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* pgm: program  */
-#line 280 "decaf.y"
+#line 272 "decaf.y"
              {top = yyval = yyvsp[0];}
-#line 2075 "y.tab.c"
+#line 2067 "y.tab.c"
     break;
 
   case 3: /* program: decl  */
-#line 284 "decaf.y"
+#line 276 "decaf.y"
               {yyval = yyvsp[0];}
-#line 2081 "y.tab.c"
+#line 2073 "y.tab.c"
     break;
 
   case 4: /* decl: %empty  */
-#line 286 "decaf.y"
+#line 278 "decaf.y"
                   {yyval = new parse_tree("program"); }
-#line 2087 "y.tab.c"
+#line 2079 "y.tab.c"
     break;
 
   case 5: /* decl: decl varDecl  */
-#line 287 "decaf.y"
+#line 279 "decaf.y"
                    {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2093 "y.tab.c"
+#line 2085 "y.tab.c"
     break;
 
   case 6: /* decl: decl funcDecl  */
-#line 288 "decaf.y"
+#line 280 "decaf.y"
                     {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2099 "y.tab.c"
+#line 2091 "y.tab.c"
     break;
 
   case 7: /* decl: decl interfaceDecl  */
-#line 289 "decaf.y"
+#line 281 "decaf.y"
                          {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2105 "y.tab.c"
+#line 2097 "y.tab.c"
     break;
 
   case 8: /* decl: decl classDecl  */
-#line 290 "decaf.y"
+#line 282 "decaf.y"
                      {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2111 "y.tab.c"
+#line 2103 "y.tab.c"
     break;
 
   case 10: /* variable: type identifier  */
-#line 296 "decaf.y"
+#line 288 "decaf.y"
                           { variable_p1(yyvsp[-1], yyvsp[0]); //semantic checking
                             yyval = new parse_tree("variable", 2, yyvsp[-1], yyvsp[0]); }
-#line 2118 "y.tab.c"
+#line 2110 "y.tab.c"
     break;
 
   case 14: /* usertype: typeidentifier  */
-#line 301 "decaf.y"
+#line 293 "decaf.y"
                          {yyval = new parse_tree("usertype", 1, yyvsp[0]); }
-#line 2124 "y.tab.c"
+#line 2116 "y.tab.c"
     break;
 
   case 15: /* primtype: string  */
-#line 303 "decaf.y"
+#line 295 "decaf.y"
                  {yyval = new parse_tree("primtype", 1, yyvsp[0]); }
-#line 2130 "y.tab.c"
+#line 2122 "y.tab.c"
     break;
 
   case 16: /* primtype: int  */
-#line 304 "decaf.y"
+#line 296 "decaf.y"
               {yyval = new parse_tree("primtype", 1, yyvsp[0]); }
-#line 2136 "y.tab.c"
+#line 2128 "y.tab.c"
     break;
 
   case 17: /* primtype: double  */
-#line 305 "decaf.y"
+#line 297 "decaf.y"
                  {yyval = new parse_tree("primtype", 1, yyvsp[0]); }
-#line 2142 "y.tab.c"
+#line 2134 "y.tab.c"
     break;
 
   case 18: /* primtype: bool  */
-#line 306 "decaf.y"
+#line 298 "decaf.y"
                {yyval = new parse_tree("primtype", 1, yyvsp[0]); }
-#line 2148 "y.tab.c"
+#line 2140 "y.tab.c"
     break;
 
   case 19: /* arraytype: usertype array  */
-#line 308 "decaf.y"
+#line 300 "decaf.y"
                           {yyval = new parse_tree("arraytype", 1, yyvsp[-1]); }
-#line 2154 "y.tab.c"
+#line 2146 "y.tab.c"
     break;
 
   case 20: /* arraytype: primtype array  */
-#line 309 "decaf.y"
+#line 301 "decaf.y"
                           {yyval = new parse_tree("arraytype", 1, yyvsp[-1]); }
-#line 2160 "y.tab.c"
+#line 2152 "y.tab.c"
     break;
 
   case 21: /* $@1: %empty  */
-#line 312 "decaf.y"
+#line 304 "decaf.y"
                                 { func_p1(yyvsp[0], yyvsp[-1]); open_scope(); }
-#line 2166 "y.tab.c"
+#line 2158 "y.tab.c"
     break;
 
   case 22: /* $@2: %empty  */
-#line 313 "decaf.y"
-                             { close_scope(); func_p2(); open_scope(); }
-#line 2172 "y.tab.c"
+#line 305 "decaf.y"
+                             { open_scope(); func_p2();}
+#line 2164 "y.tab.c"
     break;
 
   case 23: /* funcDecl: type identifier $@1 '(' formals ')' $@2 stmtblock  */
-#line 314 "decaf.y"
-                       { close_scope(); yyval = new parse_tree("functiondecl", 4, yyvsp[-7], yyvsp[-6], yyvsp[-3], yyvsp[0]); }
-#line 2178 "y.tab.c"
+#line 306 "decaf.y"
+                       { close_scope(); close_scope(); yyval = new parse_tree("functiondecl", 4, yyvsp[-7], yyvsp[-6], yyvsp[-3], yyvsp[0]); }
+#line 2170 "y.tab.c"
     break;
 
   case 24: /* $@3: %empty  */
-#line 316 "decaf.y"
+#line 308 "decaf.y"
                                 { func_p1(yyvsp[0], yyvsp[-1]); open_scope(); }
-#line 2184 "y.tab.c"
+#line 2176 "y.tab.c"
     break;
 
   case 25: /* $@4: %empty  */
-#line 317 "decaf.y"
-                             { close_scope(); func_p2(); open_scope(); }
-#line 2190 "y.tab.c"
+#line 309 "decaf.y"
+                             { open_scope(); func_p2();}
+#line 2182 "y.tab.c"
     break;
 
   case 26: /* funcDecl: void identifier $@3 '(' formals ')' $@4 stmtblock  */
-#line 318 "decaf.y"
-                       { close_scope(); yyval = new parse_tree("functiondecl", 4, yyvsp[-7], yyvsp[-6], yyvsp[-3], yyvsp[0]); }
-#line 2196 "y.tab.c"
+#line 310 "decaf.y"
+                       { close_scope(); close_scope(); yyval = new parse_tree("functiondecl", 4, yyvsp[-7], yyvsp[-6], yyvsp[-3], yyvsp[0]); }
+#line 2188 "y.tab.c"
     break;
 
   case 27: /* formals: %empty  */
-#line 320 "decaf.y"
+#line 312 "decaf.y"
                      {yyval = new parse_tree("formals"); }
-#line 2202 "y.tab.c"
+#line 2194 "y.tab.c"
     break;
 
   case 28: /* formals: formals variable  */
-#line 321 "decaf.y"
+#line 313 "decaf.y"
                                 {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2208 "y.tab.c"
+#line 2200 "y.tab.c"
     break;
 
   case 29: /* formals: formals ',' variable  */
-#line 322 "decaf.y"
+#line 314 "decaf.y"
                                     {yyvsp[-2]->add_child(yyvsp[0]); yyval = yyvsp[-2]; }
-#line 2214 "y.tab.c"
+#line 2206 "y.tab.c"
     break;
 
   case 30: /* $@5: %empty  */
-#line 325 "decaf.y"
+#line 317 "decaf.y"
                                { class_p1(yyvsp[0]); open_scope(); }
-#line 2220 "y.tab.c"
+#line 2212 "y.tab.c"
     break;
 
   case 31: /* classDecl: class identifier $@5 '{' fields '}'  */
-#line 326 "decaf.y"
+#line 318 "decaf.y"
                           { close_scope();
                             current_class = nullptr;
                             yyval = new parse_tree("class", 4, yyvsp[-4], nullptr, nullptr, yyvsp[-1]); }
-#line 2228 "y.tab.c"
+#line 2220 "y.tab.c"
     break;
 
   case 32: /* $@6: %empty  */
-#line 330 "decaf.y"
+#line 322 "decaf.y"
                                        { class_extends(yyvsp[-1], yyvsp[0]); open_scope(); }
-#line 2234 "y.tab.c"
+#line 2226 "y.tab.c"
     break;
 
   case 33: /* classDecl: class typeidentifier ext $@6 '{' fields '}'  */
-#line 331 "decaf.y"
+#line 323 "decaf.y"
                           { close_scope();
                             current_class = nullptr;
                             yyval = new parse_tree("class", 4, yyvsp[-5], yyvsp[-4], nullptr, yyvsp[-1]); }
-#line 2242 "y.tab.c"
+#line 2234 "y.tab.c"
     break;
 
   case 34: /* $@7: %empty  */
-#line 335 "decaf.y"
+#line 327 "decaf.y"
                                    { class_p1(yyvsp[0]); }
-#line 2248 "y.tab.c"
+#line 2240 "y.tab.c"
     break;
 
   case 35: /* $@8: %empty  */
-#line 336 "decaf.y"
+#line 328 "decaf.y"
                                           { open_scope(); }
-#line 2254 "y.tab.c"
+#line 2246 "y.tab.c"
     break;
 
   case 36: /* classDecl: class typeidentifier $@7 implements identifiersPlus $@8 '{' fields '}'  */
-#line 337 "decaf.y"
+#line 329 "decaf.y"
                           { close_scope();
                             current_class = nullptr;
                             yyval = new parse_tree("class", 4, yyvsp[-7], nullptr, yyvsp[-4], yyvsp[-1]); }
-#line 2262 "y.tab.c"
+#line 2254 "y.tab.c"
     break;
 
   case 37: /* $@9: %empty  */
-#line 341 "decaf.y"
+#line 333 "decaf.y"
                                        { class_extends(yyvsp[-1], yyvsp[0]); }
-#line 2268 "y.tab.c"
+#line 2260 "y.tab.c"
     break;
 
   case 38: /* $@10: %empty  */
-#line 342 "decaf.y"
+#line 334 "decaf.y"
                                           { open_scope(); }
-#line 2274 "y.tab.c"
+#line 2266 "y.tab.c"
     break;
 
   case 39: /* classDecl: class typeidentifier ext $@9 implements identifiersPlus $@10 '{' fields '}'  */
-#line 343 "decaf.y"
+#line 335 "decaf.y"
                           { close_scope();
                             current_class = nullptr;
                             yyval = new parse_tree("class", 4, yyvsp[-8], yyvsp[-7], yyvsp[-4], yyvsp[-1]); }
-#line 2282 "y.tab.c"
+#line 2274 "y.tab.c"
     break;
 
   case 40: /* fields: %empty  */
-#line 349 "decaf.y"
+#line 341 "decaf.y"
                     {yyval = new parse_tree("fields");}
-#line 2288 "y.tab.c"
+#line 2280 "y.tab.c"
     break;
 
   case 41: /* fields: fields funcDecl  */
-#line 350 "decaf.y"
+#line 342 "decaf.y"
                         {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2294 "y.tab.c"
+#line 2286 "y.tab.c"
     break;
 
   case 42: /* fields: fields varDecl  */
-#line 351 "decaf.y"
+#line 343 "decaf.y"
                        {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2300 "y.tab.c"
+#line 2292 "y.tab.c"
     break;
 
   case 43: /* identifiersPlus: identifier  */
-#line 354 "decaf.y"
+#line 346 "decaf.y"
                                { identifierplus_p1(yyvsp[0]);
                                  yyval = new parse_tree("implements", 1, yyvsp[0]); }
-#line 2307 "y.tab.c"
+#line 2299 "y.tab.c"
     break;
 
   case 44: /* identifiersPlus: identifiersPlus ',' identifier  */
-#line 356 "decaf.y"
+#line 348 "decaf.y"
                                                    { identifierplus_p1(yyvsp[0]);
                                                      yyvsp[-2]->add_child(yyvsp[0]); yyval = yyvsp[-2]; }
-#line 2314 "y.tab.c"
+#line 2306 "y.tab.c"
     break;
 
   case 45: /* ext: extends identifier  */
-#line 359 "decaf.y"
+#line 351 "decaf.y"
                            { yyval = new parse_tree("extends", 1, yyvsp[0]); }
-#line 2320 "y.tab.c"
+#line 2312 "y.tab.c"
     break;
 
   case 46: /* ext: extends typeidentifier  */
-#line 360 "decaf.y"
+#line 352 "decaf.y"
                                {yyval = new parse_tree("extends", 1, yyvsp[0]); }
-#line 2326 "y.tab.c"
+#line 2318 "y.tab.c"
     break;
 
   case 47: /* $@11: %empty  */
-#line 363 "decaf.y"
+#line 355 "decaf.y"
                                        { interface_p1(yyvsp[-1], yyvsp[0]); open_scope(); }
-#line 2332 "y.tab.c"
+#line 2324 "y.tab.c"
     break;
 
   case 48: /* interfaceDecl: interface identifier $@11 '{' prototypes '}'  */
-#line 364 "decaf.y"
+#line 356 "decaf.y"
                                      { close_scope();
                                        current_interface = nullptr;
                                        yyval = new parse_tree("interface", 2, yyvsp[-4], yyvsp[-1]); }
-#line 2340 "y.tab.c"
+#line 2332 "y.tab.c"
     break;
 
   case 49: /* prototypes: %empty  */
-#line 368 "decaf.y"
+#line 360 "decaf.y"
                         {yyval = new parse_tree("prototypes");}
-#line 2346 "y.tab.c"
+#line 2338 "y.tab.c"
     break;
 
   case 50: /* prototypes: prototypes prototype  */
-#line 369 "decaf.y"
+#line 361 "decaf.y"
                                  {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2352 "y.tab.c"
+#line 2344 "y.tab.c"
     break;
 
   case 51: /* $@12: %empty  */
-#line 371 "decaf.y"
+#line 363 "decaf.y"
                               { prototypes_p1(yyvsp[-1], yyvsp[0]); open_scope(); }
-#line 2358 "y.tab.c"
+#line 2350 "y.tab.c"
     break;
 
   case 52: /* prototype: type identifier $@12 '(' formals ')' ';'  */
-#line 372 "decaf.y"
+#line 364 "decaf.y"
                                    { close_scope();
                                      current_interface->prototype_map.insert({current_prototype->name, current_prototype});
                                      current_prototype = nullptr;
                                      yyval = new parse_tree("prototype", 3, yyvsp[-6], yyvsp[-5], yyvsp[-2]); }
-#line 2367 "y.tab.c"
+#line 2359 "y.tab.c"
     break;
 
   case 53: /* $@13: %empty  */
-#line 376 "decaf.y"
+#line 368 "decaf.y"
                               { std::string ident = yyvsp[0]->tok->text;
                                 semantic_assert(!current_scope->lookup_local(ident),
                                                 "\"%s\" is already defined",
@@ -2379,590 +2371,590 @@ yyreduce:
                                 current_scope->add(ident, current_prototype);
 
                                 open_scope(); }
-#line 2383 "y.tab.c"
+#line 2375 "y.tab.c"
     break;
 
   case 54: /* prototype: void identifier $@13 '(' formals ')' ';'  */
-#line 387 "decaf.y"
+#line 379 "decaf.y"
                                   { close_scope();
                                     current_interface->prototype_map.insert({current_prototype->name, current_prototype});
                                     current_prototype = nullptr;
                                     yyval = new parse_tree("prototype", 3, yyvsp[-6], yyvsp[-5], yyvsp[-2]); }
-#line 2392 "y.tab.c"
+#line 2384 "y.tab.c"
     break;
 
   case 55: /* stmtblock: '{' varDeclStar stmtStar '}'  */
-#line 393 "decaf.y"
+#line 385 "decaf.y"
                                               {yyval = new parse_tree("stmtblock", 2, yyvsp[-2], yyvsp[-1]);}
-#line 2398 "y.tab.c"
+#line 2390 "y.tab.c"
     break;
 
   case 56: /* varDeclStar: %empty  */
-#line 395 "decaf.y"
+#line 387 "decaf.y"
                          {yyval = new parse_tree("vardecls");}
-#line 2404 "y.tab.c"
+#line 2396 "y.tab.c"
     break;
 
   case 57: /* varDeclStar: varDeclStar varDecl  */
-#line 396 "decaf.y"
+#line 388 "decaf.y"
                                  {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2410 "y.tab.c"
+#line 2402 "y.tab.c"
     break;
 
   case 58: /* stmtStar: %empty  */
-#line 398 "decaf.y"
+#line 390 "decaf.y"
                       {yyval = new parse_tree("stmts");}
-#line 2416 "y.tab.c"
+#line 2408 "y.tab.c"
     break;
 
   case 59: /* stmtStar: stmtStar stmt  */
-#line 399 "decaf.y"
+#line 391 "decaf.y"
                         {yyvsp[-1]->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2422 "y.tab.c"
+#line 2414 "y.tab.c"
     break;
 
   case 62: /* matched_stmt: ';'  */
-#line 403 "decaf.y"
+#line 395 "decaf.y"
                   {yyval = new parse_tree("nullstmt"); }
-#line 2428 "y.tab.c"
+#line 2420 "y.tab.c"
     break;
 
   case 74: /* break_stmt: break  */
-#line 418 "decaf.y"
+#line 410 "decaf.y"
                   {yyval = new parse_tree("break", 1, yyvsp[0]); }
-#line 2434 "y.tab.c"
+#line 2426 "y.tab.c"
     break;
 
   case 75: /* return_stmt: return  */
-#line 420 "decaf.y"
+#line 412 "decaf.y"
                     {yyval = new parse_tree("return", 1, yyvsp[0]); }
-#line 2440 "y.tab.c"
+#line 2432 "y.tab.c"
     break;
 
   case 76: /* return_stmt: return expr  */
-#line 421 "decaf.y"
+#line 413 "decaf.y"
                          {yyval = new parse_tree("return", 2, yyvsp[-1], yyvsp[0]); }
-#line 2446 "y.tab.c"
+#line 2438 "y.tab.c"
     break;
 
   case 77: /* print_stmt: print '(' actuals ')'  */
-#line 423 "decaf.y"
+#line 415 "decaf.y"
                                         {yyval = new parse_tree("print", 2, yyvsp[-3], yyvsp[-1]); }
-#line 2452 "y.tab.c"
+#line 2444 "y.tab.c"
     break;
 
   case 78: /* common_if: if '(' expr ')'  */
-#line 426 "decaf.y"
+#line 418 "decaf.y"
                            {yyval = new parse_tree("if", 1, yyvsp[-1]); }
-#line 2458 "y.tab.c"
+#line 2450 "y.tab.c"
     break;
 
   case 79: /* matched_if: common_if matched_stmt else matched_stmt  */
-#line 428 "decaf.y"
+#line 420 "decaf.y"
                                                              {yyval->add_child(yyvsp[-2]); yyval->add_child(yyvsp[0]); yyval = yyvsp[-3]; }
-#line 2464 "y.tab.c"
+#line 2456 "y.tab.c"
     break;
 
   case 80: /* unmatched_if: common_if matched_stmt  */
-#line 430 "decaf.y"
+#line 422 "decaf.y"
                                                                  {yyval->add_child(yyvsp[0]); yyval->add_child(nullptr); yyval = yyvsp[-1]; }
-#line 2470 "y.tab.c"
+#line 2462 "y.tab.c"
     break;
 
   case 81: /* unmatched_if: common_if matched_stmt else unmatched_stmt  */
-#line 431 "decaf.y"
+#line 423 "decaf.y"
                                                                  {yyval->add_child(yyvsp[-2]); yyval->add_child(yyvsp[0]); yyval = yyvsp[-3]; }
-#line 2476 "y.tab.c"
+#line 2468 "y.tab.c"
     break;
 
   case 82: /* unmatched_if: common_if unmatched_stmt  */
-#line 432 "decaf.y"
+#line 424 "decaf.y"
                                                                  {yyval->add_child(yyvsp[0]); yyval->add_child(nullptr); yyval = yyvsp[-1]; }
-#line 2482 "y.tab.c"
+#line 2474 "y.tab.c"
     break;
 
   case 83: /* common_while: while '(' expr1 ')'  */
-#line 435 "decaf.y"
+#line 427 "decaf.y"
                                   {yyval = new parse_tree("while", 1, yyvsp[-1]); }
-#line 2488 "y.tab.c"
+#line 2480 "y.tab.c"
     break;
 
   case 84: /* matched_while: common_while matched_stmt  */
-#line 437 "decaf.y"
+#line 429 "decaf.y"
                                              {yyval ->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2494 "y.tab.c"
+#line 2486 "y.tab.c"
     break;
 
   case 85: /* unmatched_while: common_while unmatched_stmt  */
-#line 439 "decaf.y"
+#line 431 "decaf.y"
                                                  {yyval->add_child(yyvsp[0]); yyval = yyvsp[-1]; }
-#line 2500 "y.tab.c"
+#line 2492 "y.tab.c"
     break;
 
   case 86: /* common_for: for '(' expr ';' expr ';' expr ')'  */
-#line 443 "decaf.y"
+#line 435 "decaf.y"
                                                         {yyval = new parse_tree("for", 3, yyvsp[-5], yyvsp[-3], yyvsp[-1]); }
-#line 2506 "y.tab.c"
+#line 2498 "y.tab.c"
     break;
 
   case 87: /* common_for: for '(' ';' expr ';' expr ')'  */
-#line 444 "decaf.y"
+#line 436 "decaf.y"
                                                         {yyval = new parse_tree("for", 3, nullptr, yyvsp[-3], yyvsp[-1]); }
-#line 2512 "y.tab.c"
+#line 2504 "y.tab.c"
     break;
 
   case 88: /* common_for: for '(' expr ';' expr ';' ')'  */
-#line 445 "decaf.y"
+#line 437 "decaf.y"
                                                         {yyval = new parse_tree("for", 3, yyvsp[-4], yyvsp[-2], nullptr); }
-#line 2518 "y.tab.c"
+#line 2510 "y.tab.c"
     break;
 
   case 89: /* common_for: for '(' ';' expr ';' ')'  */
-#line 446 "decaf.y"
+#line 438 "decaf.y"
                                                         {yyval = new parse_tree("for", 3, nullptr, yyvsp[-2], nullptr); }
-#line 2524 "y.tab.c"
+#line 2516 "y.tab.c"
     break;
 
   case 90: /* matched_for: common_for matched_stmt  */
-#line 448 "decaf.y"
+#line 440 "decaf.y"
                                          {yyval ->add_child(yyvsp[0]); yyval = yyvsp[-1];}
-#line 2530 "y.tab.c"
+#line 2522 "y.tab.c"
     break;
 
   case 91: /* unmatched_for: common_for unmatched_stmt  */
-#line 450 "decaf.y"
+#line 442 "decaf.y"
                                              {yyval ->add_child(yyvsp[0]); yyval = yyvsp[-1];}
-#line 2536 "y.tab.c"
+#line 2528 "y.tab.c"
     break;
 
   case 93: /* expr: Lvalue sceq expr1  */
-#line 454 "decaf.y"
+#line 446 "decaf.y"
                               {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2542 "y.tab.c"
+#line 2534 "y.tab.c"
     break;
 
   case 95: /* expr1: expr1 or expr2  */
-#line 457 "decaf.y"
+#line 449 "decaf.y"
                              {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2548 "y.tab.c"
+#line 2540 "y.tab.c"
     break;
 
   case 97: /* expr2: expr2 and expr3  */
-#line 460 "decaf.y"
+#line 452 "decaf.y"
                               {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2554 "y.tab.c"
+#line 2546 "y.tab.c"
     break;
 
   case 99: /* expr3: expr4 eq expr4  */
-#line 463 "decaf.y"
+#line 455 "decaf.y"
                               {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2560 "y.tab.c"
+#line 2552 "y.tab.c"
     break;
 
   case 100: /* expr3: expr4 neq expr4  */
-#line 464 "decaf.y"
+#line 456 "decaf.y"
                                {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2566 "y.tab.c"
+#line 2558 "y.tab.c"
     break;
 
   case 102: /* expr4: expr5 sclt expr5  */
-#line 467 "decaf.y"
+#line 459 "decaf.y"
                                 {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2572 "y.tab.c"
+#line 2564 "y.tab.c"
     break;
 
   case 103: /* expr4: expr5 scgt expr5  */
-#line 468 "decaf.y"
+#line 460 "decaf.y"
                                 {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2578 "y.tab.c"
+#line 2570 "y.tab.c"
     break;
 
   case 104: /* expr4: expr5 le expr5  */
-#line 469 "decaf.y"
+#line 461 "decaf.y"
                               {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2584 "y.tab.c"
+#line 2576 "y.tab.c"
     break;
 
   case 105: /* expr4: expr5 ge expr5  */
-#line 470 "decaf.y"
+#line 462 "decaf.y"
                               {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2590 "y.tab.c"
+#line 2582 "y.tab.c"
     break;
 
   case 107: /* expr5: expr5 scplus expr6  */
-#line 473 "decaf.y"
+#line 465 "decaf.y"
                                  {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2596 "y.tab.c"
+#line 2588 "y.tab.c"
     break;
 
   case 108: /* expr5: expr5 scminus expr6  */
-#line 474 "decaf.y"
+#line 466 "decaf.y"
                                   {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2602 "y.tab.c"
+#line 2594 "y.tab.c"
     break;
 
   case 110: /* expr6: expr6 sctimes expr7  */
-#line 477 "decaf.y"
+#line 469 "decaf.y"
                                   {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2608 "y.tab.c"
+#line 2600 "y.tab.c"
     break;
 
   case 111: /* expr6: expr6 scdiv expr7  */
-#line 478 "decaf.y"
+#line 470 "decaf.y"
                                 {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2614 "y.tab.c"
+#line 2606 "y.tab.c"
     break;
 
   case 112: /* expr6: expr6 scmod expr7  */
-#line 479 "decaf.y"
+#line 471 "decaf.y"
                                 {yyval = new parse_tree("binop", 3, yyvsp[-2], yyvsp[-1], yyvsp[0]);}
-#line 2620 "y.tab.c"
+#line 2612 "y.tab.c"
     break;
 
   case 114: /* expr7: scneq expr7  */
-#line 482 "decaf.y"
+#line 474 "decaf.y"
                           {yyval = new parse_tree("uop", 2, yyvsp[-1], yyvsp[0]);}
-#line 2626 "y.tab.c"
+#line 2618 "y.tab.c"
     break;
 
   case 115: /* expr7: scminus expr7  */
-#line 483 "decaf.y"
+#line 475 "decaf.y"
                             {yyval = new parse_tree("uop", 2, yyvsp[-1], yyvsp[0]);}
-#line 2632 "y.tab.c"
+#line 2624 "y.tab.c"
     break;
 
   case 120: /* expr9: '(' expr ')'  */
-#line 490 "decaf.y"
+#line 482 "decaf.y"
                     { yyval = yyvsp[-1]; }
-#line 2638 "y.tab.c"
+#line 2630 "y.tab.c"
     break;
 
   case 124: /* expr9: new '(' identifier ')'  */
-#line 494 "decaf.y"
+#line 486 "decaf.y"
                                  {yyval = new parse_tree("new", 1, yyvsp[-1]);}
-#line 2644 "y.tab.c"
+#line 2636 "y.tab.c"
     break;
 
   case 125: /* expr9: newarray '(' expr ',' type ')'  */
-#line 495 "decaf.y"
+#line 487 "decaf.y"
                                             {yyval = new parse_tree("newarray", 2, yyvsp[-3], yyvsp[-1]);}
-#line 2650 "y.tab.c"
+#line 2642 "y.tab.c"
     break;
 
   case 126: /* expr9: newarray '(' expr ',' special ')'  */
-#line 496 "decaf.y"
+#line 488 "decaf.y"
                                                {yyval = new parse_tree("newarray", 2, yyvsp[-3], yyvsp[-1]);}
-#line 2656 "y.tab.c"
+#line 2648 "y.tab.c"
     break;
 
   case 128: /* Lvalue: expr8 '[' expr1 ']'  */
-#line 499 "decaf.y"
+#line 491 "decaf.y"
                                     {yyval = new parse_tree("aref", 2, yyvsp[-3], yyvsp[-1]);}
-#line 2662 "y.tab.c"
+#line 2654 "y.tab.c"
     break;
 
   case 129: /* Lvalue: expr8 '.' identifier  */
-#line 500 "decaf.y"
+#line 492 "decaf.y"
                                     {yyval = new parse_tree("fieldaccess", 2, yyvsp[-2], yyvsp[0]);}
-#line 2668 "y.tab.c"
+#line 2660 "y.tab.c"
     break;
 
   case 130: /* call: expr8 '(' nactuals ')'  */
-#line 502 "decaf.y"
+#line 494 "decaf.y"
                                    {yyval = new parse_tree("call", 2, yyvsp[-3], yyvsp[-1]);}
-#line 2674 "y.tab.c"
+#line 2666 "y.tab.c"
     break;
 
   case 131: /* special: identifier  */
-#line 505 "decaf.y"
+#line 497 "decaf.y"
                        {yyval = new parse_tree("usertype", 1, yyvsp[0]);}
-#line 2680 "y.tab.c"
+#line 2672 "y.tab.c"
     break;
 
   case 132: /* nactuals: %empty  */
-#line 507 "decaf.y"
+#line 499 "decaf.y"
                       {yyval = new parse_tree("actuals");}
-#line 2686 "y.tab.c"
+#line 2678 "y.tab.c"
     break;
 
   case 134: /* actuals: expr  */
-#line 510 "decaf.y"
+#line 502 "decaf.y"
               {yyval = new parse_tree("actuals", 1, yyvsp[0]);}
-#line 2692 "y.tab.c"
+#line 2684 "y.tab.c"
     break;
 
   case 135: /* actuals: actuals ',' expr  */
-#line 511 "decaf.y"
+#line 503 "decaf.y"
                           {yyvsp[-2]->add_child(yyvsp[0]); yyval = yyvsp[-2];}
-#line 2698 "y.tab.c"
+#line 2690 "y.tab.c"
     break;
 
   case 141: /* typeidentifier: T_TYPEIDENTIFIER  */
-#line 520 "decaf.y"
+#line 512 "decaf.y"
                                  { yyval = new parse_tree(mytok); }
-#line 2704 "y.tab.c"
+#line 2696 "y.tab.c"
     break;
 
   case 142: /* identifier: T_IDENTIFIER  */
-#line 521 "decaf.y"
+#line 513 "decaf.y"
                          { yyval = new parse_tree(mytok); }
-#line 2710 "y.tab.c"
+#line 2702 "y.tab.c"
     break;
 
   case 143: /* string: "string"  */
-#line 522 "decaf.y"
+#line 514 "decaf.y"
                  { yyval = new parse_tree(mytok); }
-#line 2716 "y.tab.c"
+#line 2708 "y.tab.c"
     break;
 
   case 144: /* int: "int"  */
-#line 523 "decaf.y"
+#line 515 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2722 "y.tab.c"
+#line 2714 "y.tab.c"
     break;
 
   case 145: /* double: "double"  */
-#line 524 "decaf.y"
+#line 516 "decaf.y"
                  { yyval = new parse_tree(mytok); }
-#line 2728 "y.tab.c"
+#line 2720 "y.tab.c"
     break;
 
   case 146: /* bool: "bool"  */
-#line 525 "decaf.y"
+#line 517 "decaf.y"
              { yyval = new parse_tree(mytok); }
-#line 2734 "y.tab.c"
+#line 2726 "y.tab.c"
     break;
 
   case 147: /* array: "[]"  */
-#line 526 "decaf.y"
+#line 518 "decaf.y"
                { yyval = new parse_tree(mytok); }
-#line 2740 "y.tab.c"
+#line 2732 "y.tab.c"
     break;
 
   case 148: /* void: "void"  */
-#line 527 "decaf.y"
+#line 519 "decaf.y"
              { yyval = new parse_tree(mytok); yyval->type = semantics_void_type; }
-#line 2746 "y.tab.c"
+#line 2738 "y.tab.c"
     break;
 
   case 149: /* break: "break"  */
-#line 528 "decaf.y"
+#line 520 "decaf.y"
                { yyval = new parse_tree(mytok); }
-#line 2752 "y.tab.c"
+#line 2744 "y.tab.c"
     break;
 
   case 150: /* this: "this"  */
-#line 529 "decaf.y"
+#line 521 "decaf.y"
              { yyval = new parse_tree(mytok); }
-#line 2758 "y.tab.c"
+#line 2750 "y.tab.c"
     break;
 
   case 151: /* le: "<="  */
-#line 530 "decaf.y"
+#line 522 "decaf.y"
          { yyval = new parse_tree(mytok); }
-#line 2764 "y.tab.c"
+#line 2756 "y.tab.c"
     break;
 
   case 152: /* ge: ">="  */
-#line 531 "decaf.y"
+#line 523 "decaf.y"
          { yyval = new parse_tree(mytok); }
-#line 2770 "y.tab.c"
+#line 2762 "y.tab.c"
     break;
 
   case 153: /* eq: "=="  */
-#line 532 "decaf.y"
+#line 524 "decaf.y"
          { yyval = new parse_tree(mytok); }
-#line 2776 "y.tab.c"
+#line 2768 "y.tab.c"
     break;
 
   case 154: /* neq: "!="  */
-#line 533 "decaf.y"
+#line 525 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2782 "y.tab.c"
+#line 2774 "y.tab.c"
     break;
 
   case 155: /* and: "&&"  */
-#line 534 "decaf.y"
+#line 526 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2788 "y.tab.c"
+#line 2780 "y.tab.c"
     break;
 
   case 156: /* or: "||"  */
-#line 535 "decaf.y"
+#line 527 "decaf.y"
          { yyval = new parse_tree(mytok); }
-#line 2794 "y.tab.c"
+#line 2786 "y.tab.c"
     break;
 
   case 157: /* readint: "ReadInteger"  */
-#line 536 "decaf.y"
+#line 528 "decaf.y"
                        { yyval = new parse_tree(mytok); }
-#line 2800 "y.tab.c"
+#line 2792 "y.tab.c"
     break;
 
   case 158: /* new: "New"  */
-#line 537 "decaf.y"
+#line 529 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2806 "y.tab.c"
+#line 2798 "y.tab.c"
     break;
 
   case 159: /* newarray: "NewArray"  */
-#line 538 "decaf.y"
+#line 530 "decaf.y"
                      { yyval = new parse_tree(mytok); }
-#line 2812 "y.tab.c"
+#line 2804 "y.tab.c"
     break;
 
   case 160: /* intlit: T_INTLITERAL  */
-#line 539 "decaf.y"
+#line 531 "decaf.y"
                      { yyval = new parse_tree(mytok);  yyval->type = semantics_int_type; }
-#line 2818 "y.tab.c"
+#line 2810 "y.tab.c"
     break;
 
   case 161: /* dbllit: T_DBLLITERAL  */
-#line 540 "decaf.y"
+#line 532 "decaf.y"
                      { yyval = new parse_tree(mytok); yyval->type = semantics_double_type; }
-#line 2824 "y.tab.c"
+#line 2816 "y.tab.c"
     break;
 
   case 162: /* boollit: T_BOOLLITERAL  */
-#line 541 "decaf.y"
+#line 533 "decaf.y"
                        { yyval = new parse_tree(mytok); yyval->type = semantics_bool_type; }
-#line 2830 "y.tab.c"
+#line 2822 "y.tab.c"
     break;
 
   case 163: /* stringlit: T_STRINGLITERAL  */
-#line 542 "decaf.y"
+#line 534 "decaf.y"
                            { yyval = new parse_tree(mytok); yyval->type = semantics_string_type; }
-#line 2836 "y.tab.c"
+#line 2828 "y.tab.c"
     break;
 
   case 164: /* null: "null"  */
-#line 543 "decaf.y"
+#line 535 "decaf.y"
              { yyval = new parse_tree(mytok); }
-#line 2842 "y.tab.c"
+#line 2834 "y.tab.c"
     break;
 
   case 165: /* readline: "ReadLine"  */
-#line 544 "decaf.y"
+#line 536 "decaf.y"
                      { yyval = new parse_tree(mytok); }
-#line 2848 "y.tab.c"
+#line 2840 "y.tab.c"
     break;
 
   case 166: /* if: "if"  */
-#line 545 "decaf.y"
+#line 537 "decaf.y"
          { yyval = new parse_tree(mytok); }
-#line 2854 "y.tab.c"
+#line 2846 "y.tab.c"
     break;
 
   case 167: /* else: "else"  */
-#line 546 "decaf.y"
+#line 538 "decaf.y"
              { yyval = new parse_tree(mytok); }
-#line 2860 "y.tab.c"
+#line 2852 "y.tab.c"
     break;
 
   case 168: /* print: "Print"  */
-#line 547 "decaf.y"
+#line 539 "decaf.y"
                { yyval = new parse_tree(mytok); }
-#line 2866 "y.tab.c"
+#line 2858 "y.tab.c"
     break;
 
   case 169: /* return: "return"  */
-#line 548 "decaf.y"
+#line 540 "decaf.y"
                  { yyval = new parse_tree(mytok); }
-#line 2872 "y.tab.c"
+#line 2864 "y.tab.c"
     break;
 
   case 170: /* class: "class"  */
-#line 549 "decaf.y"
+#line 541 "decaf.y"
                { yyval = new parse_tree(mytok); }
-#line 2878 "y.tab.c"
+#line 2870 "y.tab.c"
     break;
 
   case 171: /* extends: "extends"  */
-#line 550 "decaf.y"
+#line 542 "decaf.y"
                    { yyval = new parse_tree(mytok); }
-#line 2884 "y.tab.c"
+#line 2876 "y.tab.c"
     break;
 
   case 172: /* implements: "implements"  */
-#line 551 "decaf.y"
+#line 543 "decaf.y"
                          { yyval = new parse_tree(mytok); }
-#line 2890 "y.tab.c"
+#line 2882 "y.tab.c"
     break;
 
   case 173: /* for: "for"  */
-#line 552 "decaf.y"
+#line 544 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2896 "y.tab.c"
+#line 2888 "y.tab.c"
     break;
 
   case 174: /* while: "while"  */
-#line 553 "decaf.y"
+#line 545 "decaf.y"
                { yyval = new parse_tree(mytok); }
-#line 2902 "y.tab.c"
+#line 2894 "y.tab.c"
     break;
 
   case 175: /* interface: "interface"  */
-#line 554 "decaf.y"
+#line 546 "decaf.y"
                        { yyval = new parse_tree(mytok); }
-#line 2908 "y.tab.c"
+#line 2900 "y.tab.c"
     break;
 
   case 176: /* scplus: '+'  */
-#line 558 "decaf.y"
+#line 550 "decaf.y"
             { yyval = new parse_tree(mytok); }
-#line 2914 "y.tab.c"
+#line 2906 "y.tab.c"
     break;
 
   case 177: /* scminus: '-'  */
-#line 559 "decaf.y"
+#line 551 "decaf.y"
              { yyval = new parse_tree(mytok); }
-#line 2920 "y.tab.c"
+#line 2912 "y.tab.c"
     break;
 
   case 178: /* sctimes: '*'  */
-#line 560 "decaf.y"
+#line 552 "decaf.y"
              { yyval = new parse_tree(mytok); }
-#line 2926 "y.tab.c"
+#line 2918 "y.tab.c"
     break;
 
   case 179: /* scdiv: '/'  */
-#line 561 "decaf.y"
+#line 553 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2932 "y.tab.c"
+#line 2924 "y.tab.c"
     break;
 
   case 180: /* scmod: '%'  */
-#line 562 "decaf.y"
+#line 554 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2938 "y.tab.c"
+#line 2930 "y.tab.c"
     break;
 
   case 181: /* sclt: '<'  */
-#line 563 "decaf.y"
+#line 555 "decaf.y"
           { yyval = new parse_tree(mytok); }
-#line 2944 "y.tab.c"
+#line 2936 "y.tab.c"
     break;
 
   case 182: /* scgt: '>'  */
-#line 564 "decaf.y"
+#line 556 "decaf.y"
           { yyval = new parse_tree(mytok); }
-#line 2950 "y.tab.c"
+#line 2942 "y.tab.c"
     break;
 
   case 183: /* sceq: '='  */
-#line 565 "decaf.y"
+#line 557 "decaf.y"
           { yyval = new parse_tree(mytok); }
-#line 2956 "y.tab.c"
+#line 2948 "y.tab.c"
     break;
 
   case 184: /* scneq: '!'  */
-#line 566 "decaf.y"
+#line 558 "decaf.y"
            { yyval = new parse_tree(mytok); }
-#line 2962 "y.tab.c"
+#line 2954 "y.tab.c"
     break;
 
 
-#line 2966 "y.tab.c"
+#line 2958 "y.tab.c"
 
       default: break;
     }
@@ -3187,5 +3179,5 @@ yyreturn:
   return yyresult;
 }
 
-#line 568 "decaf.y"
+#line 560 "decaf.y"
 

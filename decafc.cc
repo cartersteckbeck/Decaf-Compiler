@@ -6,6 +6,8 @@
 
 // prototypes:
 extern FILE *yyin;
+extern s_class *current_class;
+extern s_function *current_function;
 int yylex(); // this is only needed for the --lex option I think.
 void main_lex();
 void main_tree();
@@ -174,7 +176,7 @@ bool ensure_same_type(s_type *a, s_type *b)
   return false;
 }
 
-semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* current_class)
+semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
 {
   // base case, return semantics type of expressions
   if (tree->tok)
@@ -182,15 +184,16 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* cur
     if (current_class == nullptr && tree->to_string().substr(0, 4) == "THIS")
       semantic_assert(false,
                      "using \'this\' outside of a class.");
-    // std::cout << tree->tok->text << std::endl;
-    // scope->print_symbol_table();
     semantics * s = scope->lookup(tree->tok->text);
     // if found in current scope
     if (s != nullptr)
     {
-      // std::cout << s->to_string();
-      if (dynamic_cast<s_var*>(s))
+      if (dynamic_cast<s_var*>(s)){
         return dynamic_cast<s_var*>(s)->type;
+      }
+      else if (dynamic_cast<s_type*>(s)){
+        return dynamic_cast<s_type*>(s);
+      }
       else if (dynamic_cast<s_function*>(s))
         return dynamic_cast<s_function*>(s)->return_type;
     }
@@ -206,8 +209,10 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* cur
         return function->return_type;
     }
     // if s still nullptr, return builtin
-    else if (s == nullptr && tree->type)
+    else if (s == nullptr && tree->type){
+
       return tree->type;
+    }
     else
     {
       // otherwise something is terribly wrong
@@ -216,22 +221,31 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* cur
                       tree->tok->text.c_str());
     }
   }
-
   std::string expression_type = tree->description;
   if (expression_type == "binop")
   {
-    // std::cout << tree->to_string() << std::endl;
     std::string binop_type = tree->children[1]->to_string().substr(0, 2);
-    // std::cout << "binop_type :: \'" << binop_type << "\'" << std::endl;
-    semantics* lhs = ensure_legal_expression(tree->children[0], scope, current_class);
-    semantics* rhs = ensure_legal_expression(tree->children[2], scope, current_class);
+    semantics* rhs =  ensure_legal_expression(tree->children[2], scope);
+    semantics* lhs = ensure_legal_expression(tree->children[0], scope);
+    if (tree->children[0]->description == "aref"){
+      lhs = ensure_legal_expression(tree->children[0]->children[0], scope);
+      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[0]->children[1], scope))->name != "int")
+        semantic_assert(false, "cannot use non-int as index");
+    }
+    if (tree->children[2]->description == "aref"){
+      rhs = ensure_legal_expression(tree->children[2]->children[0], scope);
+      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[1], scope))->name != "int")
+        semantic_assert(false, "cannot use non-int as index");
+    }
 
     // cast correctly to s_type:
     s_type * lhs_type;
     s_type * rhs_type;
 
-    if (dynamic_cast<s_var*>(lhs))
+    if (dynamic_cast<s_var*>(lhs)){
+      std::cout << "you should be here" << std::endl;
       lhs_type = dynamic_cast<s_var*>(lhs)->type;
+    }
     else if (dynamic_cast<s_function*>(lhs))
       lhs_type = dynamic_cast<s_function*>(lhs)->return_type;
     else if (lhs == semantics_bool_type)
@@ -298,7 +312,6 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* cur
       semantic_assert(false,
                       "lhs and rhs of expr not both ints or dbls.");
     }
-
     if (binop_type == "< " || binop_type == "<=" ||
         binop_type == "> " || binop_type == ">= ")
     {
@@ -319,7 +332,7 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* cur
   else if (tree->description == "fieldacess")
   {
     // semantics* c = ensure_legal_expression(tree->children[0], scope, current_class); // instance of class c
-    semantics* ci = ensure_legal_expression(tree->children[1], scope, current_class); // class c instance var/method
+    semantics* ci = ensure_legal_expression(tree->children[1], scope); // class c instance var/method
 
     if (dynamic_cast<s_var*>(ci))
       return dynamic_cast<s_var*>(ci)->type;
@@ -335,43 +348,95 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope, s_class* cur
 
   else if (tree->description == "call")
   {
-    semantics* f = ensure_legal_expression(tree->children[0], scope, current_class);
-    // semantics* params = ensure_legal_expression(tree->children[1], scope, current_class);
-
-    return f;
+    // tree->children[0]->tok->text = func name
+    // tree->children[1]->tok->text = params
+    semantic_assert(ensure_legal_expression(tree->children[0], scope), 
+                    "undefined func \"%s\"", 
+                    tree->children[0]->tok->text.c_str());
+    semantics* f;
+    if(scope->lookup(tree->children[0]->tok->text)){
+      f = scope->lookup(tree->children[0]->tok->text);
+    }
+    if (current_class && find_function_in_class_hierarchy(current_class, tree->children[0]->tok->text)){
+      f = find_function_in_class_hierarchy(current_class, tree->children[0]->tok->text);
+    }
+    s_function* curr_func = dynamic_cast<s_function*> (f); 
+    std::vector<s_var *> params = curr_func->params; 
+    if(tree->children[1]->children.size() != params.size()){
+      if(tree->children[1]->children.size() < params.size())
+        semantic_assert(false, "too few arguments for function \"%s\"", 
+                        tree->children[0]->tok->text.c_str());
+      else
+        semantic_assert(false, 
+                        "too many arugments for function \"%s\"", 
+                        tree->children[0]->tok->text.c_str()); 
+    }
+    for (size_t i = 0; i < params.size(); i++){
+      if(params[i]->type != ensure_legal_expression(tree->children[1]->children[i], scope)){
+        semantic_assert(false, 
+                        "function call arguments does not match param list for \"%s\"", 
+                        tree->children[0]->tok->text.c_str());
+        }
+      }
+    return curr_func->return_type;
   }
-
   return nullptr;
+}
+
+bool check_return(parse_tree *stmt_block, s_type *return_type)
+{
+  for (size_t i=0; i<stmt_block->children.size(); i++){
+      if(stmt_block->children[i]){
+        if (stmt_block->children[i]->description == "return"){
+           if(return_type != ensure_legal_expression(stmt_block->children[i]->children[1], stmt_block->scope))
+              return false; 
+        }
+      }
+  }
+  for (size_t i = 0; i<stmt_block->children.size(); i++){
+    if (stmt_block->children[i] && (stmt_block->children[i]->description == "while" || stmt_block->children[i]->description == "for" ||
+      stmt_block->children[i]->description == "if") )
+      return check_return(stmt_block->children[i], return_type);
+  }
+  return true;
 }
 
 semantics * sem_pass2(parse_tree *tree, symtab *scope)
 {
-  s_class * current_class = nullptr;
-  // current_function = nullptr;
-
   if (!tree)
   {
      return nullptr;
   }
 
-  if (tree->tok)
-  {
-    if (current_class == nullptr && tree->to_string().substr(0, 4) == "THIS")
-      semantic_assert(false,
-                     "using \'this\' outside of a class.");
-    else
-     return scope->lookup(tree->tok->text);
-  }
-
   if (tree->description == "class")
     current_class = dynamic_cast<s_class*>(scope->lookup(tree->children[0]->tok->text));
+
+  if (tree->tok)
+  {
+    // if (current_class == nullptr && tree->to_string().substr(0, 4) == "THIS")
+    //   semantic_assert(false,
+    //                  "using \"this\" outside of a class.");
+      return scope->lookup(tree->tok->text);
+  }
+
+  if (tree->description == "functiondecl"){
+    s_function *curr_function = dynamic_cast<s_function*>(scope->lookup(tree->children[1]->tok->text));
+    s_type *return_type = curr_function->return_type; 
+    parse_tree *stmt_block = tree->children[3]->children[1];
+    bool check = check_return(stmt_block, return_type);
+    if (!check){
+      semantic_assert(check, 
+                      "return expression not equal to function \"%s\" return type",
+                      tree->children[1]->tok->text.c_str());
+    }
+  }
 
   if (tree->description == "binop" ||
       tree->description == "uop" ||
       tree->description == "fieldaccess" ||
       tree->description == "call")
   {
-    return ensure_legal_expression(tree, tree->scope, current_class);
+    return ensure_legal_expression(tree, tree->scope);
   }
 
   if (tree->description == "print")
@@ -379,7 +444,7 @@ semantics * sem_pass2(parse_tree *tree, symtab *scope)
     parse_tree * actuals = tree->children[1];
     for (size_t i = 0; i < actuals->children.size(); i++)
     {
-      semantics * type = ensure_legal_expression(actuals->children[i], tree->scope, current_class);
+      semantics * type = ensure_legal_expression(actuals->children[i], tree->scope);
       semantic_assert((type == semantics_bool_type ||
                        type == semantics_string_type ||
                        type == semantics_int_type ||
@@ -388,24 +453,25 @@ semantics * sem_pass2(parse_tree *tree, symtab *scope)
                       actuals->children[i]->to_string().c_str());
     }
   }
+
   if (tree->description == "while")
   {
     parse_tree * cond = tree->children[0];
-    semantic_assert(ensure_legal_expression(cond, tree->scope, current_class) == semantics_bool_type,
+    semantic_assert(ensure_legal_expression(cond, tree->scope) == semantics_bool_type,
                     "while condition not boolean.");
   }
 
   if (tree->description == "if")
   {
     parse_tree * cond = tree->children[0];
-    semantic_assert(ensure_legal_expression(cond, tree->scope, current_class) == semantics_bool_type,
+    semantic_assert(ensure_legal_expression(cond, tree->scope) == semantics_bool_type,
                     "if condition not boolean.");
   }
 
   if (tree->description == "for")
   {
     parse_tree * cond = tree->children[1];
-    semantic_assert(ensure_legal_expression(cond, tree->scope, current_class) == semantics_bool_type,
+    semantic_assert(ensure_legal_expression(cond, tree->scope) == semantics_bool_type,
                     "for loop condition not boolean.");
   }
 
@@ -429,6 +495,7 @@ void main_sem()
    current_scope->add("int", semantics_int_type);
    current_scope->add("bool", semantics_bool_type);
    current_scope->add("string", semantics_string_type);
+   current_scope->add("void", semantics_void_type);
    open_scope();  // this would allow redefinition of built-ins.
                   // (Not possible in our grammars)
    yyparse();

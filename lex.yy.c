@@ -1251,7 +1251,7 @@ YY_RULE_SETUP
 #line 68 "decaf.l"
 { string_content = yytext;
                         if (string_content == "void")
-                            return make_token(T_VOID, current_line);
+                            return make_token(T_VOID, current_line, yytext);
                         if (string_content == "int")
                             return make_token(T_INT, current_line, yytext);
                         if (string_content == "true" || string_content == "false")
