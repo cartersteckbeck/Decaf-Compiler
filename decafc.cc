@@ -148,27 +148,6 @@ s_function * find_function_in_class_hierarchy(s_class* c, std::string func)
     return find_function_in_class_hierarchy(c->superclass, func);
 }
 
-// bool ensure_bool(semantics *a)
-// {
-//   if (dynamic_cast<semantics_bool_type*>(a))
-//     return true;
-//   return false;
-// }
-//
-// bool ensure_int(semantics *a)
-// {
-//   if (dynamic_cast<semantics_int_type*>(a))
-//     return true;
-//   return false;
-// }
-//
-// bool ensure_double(semantics *a)
-// {
-//   if (dynamic_cast<semantics_double_type*>(a))
-//     return true;
-//   return false;
-// }
-//
 bool ensure_same_type(s_type *a, s_type *b)
 {
   if (a == b)
@@ -237,15 +216,28 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
       if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[1], scope))->name != "int")
         semantic_assert(false, "cannot use non-int as index");
     }
+    if (tree->children[2]->description == "newarray"){
+      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[0], scope))->name != "int")
+        semantic_assert(false, "cannot initialize array with non-int size");
+      // PROBABLY CHANGE
+      if(!scope->lookup(tree->children[2]->children[1]->children[0]->tok->text))
+        semantic_assert(false, "cannot initialize with non-prim type");
+      rhs = scope->lookup(tree->children[2]->children[1]->children[0]->tok->text);
+    }
+    if (tree->children[2]->description == "new"){
+      std::string ident = tree->children[0]->tok->text; 
+      //SAME WITH THIS ONE
+      if(!scope->lookup(tree->children[2]->children[0]->tok->text))
+        semantic_assert(false, "cannot initialize \"%s\" with non-class type", ident.c_str());
+      rhs = scope->lookup(tree->children[2]->children[0]->tok->text);
+    }
 
     // cast correctly to s_type:
     s_type * lhs_type;
     s_type * rhs_type;
 
-    if (dynamic_cast<s_var*>(lhs)){
-      std::cout << "you should be here" << std::endl;
+    if (dynamic_cast<s_var*>(lhs))
       lhs_type = dynamic_cast<s_var*>(lhs)->type;
-    }
     else if (dynamic_cast<s_function*>(lhs))
       lhs_type = dynamic_cast<s_function*>(lhs)->return_type;
     else if (lhs == semantics_bool_type)
@@ -388,6 +380,10 @@ bool check_return(parse_tree *stmt_block, s_type *return_type)
   for (size_t i=0; i<stmt_block->children.size(); i++){
       if(stmt_block->children[i]){
         if (stmt_block->children[i]->description == "return"){
+           if (stmt_block->children[i]->children.size() == 1 && return_type->name != "void")
+              return false; 
+           if (stmt_block->children[i]->children.size() == 2 && return_type->name == "void")
+              return false; 
            if(return_type != ensure_legal_expression(stmt_block->children[i]->children[1], stmt_block->scope))
               return false; 
         }
@@ -442,9 +438,17 @@ semantics * sem_pass2(parse_tree *tree, symtab *scope)
   if (tree->description == "print")
   {
     parse_tree * actuals = tree->children[1];
+    semantics *type; 
     for (size_t i = 0; i < actuals->children.size(); i++)
     {
-      semantics * type = ensure_legal_expression(actuals->children[i], tree->scope);
+      if(actuals->children[i]->description == "aref"){
+        type = ensure_legal_expression(actuals->children[i]->children[0], tree->scope);
+        if (dynamic_cast<s_type*>(ensure_legal_expression(actuals->children[i]->children[1], tree->scope))->name != "int"){
+          semantic_assert(false, "cannot index with non-int");
+        }
+      }
+      else
+        type = ensure_legal_expression(actuals->children[i], tree->scope);
       semantic_assert((type == semantics_bool_type ||
                        type == semantics_string_type ||
                        type == semantics_int_type ||

@@ -480,18 +480,20 @@ Hello, world
 //   foo(A);
 // }
 
-// test 38
-void main()
-{
-  int [] A;
-  A = NewArray(10, int);
-  A[0] = 4;
-  Print(A[0]);
-}
+// test 38 passed
+// void main()
+// {
+//   int [] A;
+//   A = NewArray(10, int);
+//   A[0] = 4;
+//   Print(A[0]);
+// }
 //
 // /* Output:
 // 4
 // */
+
+//test 39 passed
 // void main()
 // {
 //   int [] A;
@@ -499,7 +501,9 @@ void main()
 //   A[0] = 4;
 //   Print(A[0]);
 // }
-//
+
+
+//test 40 passed
 // void main()
 // {
 //   int [] A;
@@ -507,44 +511,48 @@ void main()
 //   A[0] = 4;
 //   Print(A[0]);
 // }
-//
+
+//test 41 passed
 // int bar()
 // {
 //    return;
 // }
-//
+
 // void main()
 // {
 //   bar();
 // }
-//
+
+//test 42 pased
 // void bar()
 // {
 //    return true;
 // }
-//
+
 // void main()
 // {
 //   bar();
 // }
 //
 //
+
+//test 43 passed
 // class A {}
-//
+
 // void main()
 // {
 //   A a;
 // }
 //
-//
-// class A {}
-//
-// void main()
-// {
-//   A a;
-//   a = New(A);
-// }
-//
+//test 44 
+class A {}
+
+void main()
+{
+  A a;
+  a = New(A);
+}
+
 //
 // class A {}
 //

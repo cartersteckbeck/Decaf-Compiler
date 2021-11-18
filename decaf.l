@@ -21,7 +21,7 @@ IDENTIFIER [A-Za-z][A-Za-z0-9_]*
 
 %%
 void {return make_token(T_VOID, current_line);}
-int {return make_token(T_INT, current_line);}
+int {return make_token(T_INT, current_line, yytext);}
 double {return make_token(T_DOUBLE, current_line);}
 bool {return make_token(T_BOOL, current_line);}
 string {return make_token(T_STRING, current_line);}

@@ -1062,7 +1062,7 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 #line 24 "decaf.l"
-{return make_token(T_INT, current_line);}
+{return make_token(T_INT, current_line, yytext);}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
