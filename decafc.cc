@@ -167,6 +167,7 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
     // if found in current scope
     if (s != nullptr)
     {
+      //std::cout << "in s!=nullptr" << std::endl;
       if (dynamic_cast<s_var*>(s)){
         return dynamic_cast<s_var*>(s)->type;
       }
@@ -204,20 +205,20 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
   if (expression_type == "binop")
   {
     std::string binop_type = tree->children[1]->to_string().substr(0, 2);
-    semantics* rhs =  ensure_legal_expression(tree->children[2], scope);
-    semantics* lhs = ensure_legal_expression(tree->children[0], scope);
+    semantics* rhs =  ensure_legal_expression(tree->children[2], tree->scope);
+    semantics* lhs = ensure_legal_expression(tree->children[0], tree->scope);
     if (tree->children[0]->description == "aref"){
       lhs = ensure_legal_expression(tree->children[0]->children[0], scope);
-      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[0]->children[1], scope))->name != "int")
+      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[0]->children[1], tree->scope))->name != "int")
         semantic_assert(false, "cannot use non-int as index");
     }
     if (tree->children[2]->description == "aref"){
       rhs = ensure_legal_expression(tree->children[2]->children[0], scope);
-      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[1], scope))->name != "int")
+      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[1], tree->scope))->name != "int")
         semantic_assert(false, "cannot use non-int as index");
     }
     if (tree->children[2]->description == "newarray"){
-      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[0], scope))->name != "int")
+      if(dynamic_cast<s_type*>(ensure_legal_expression(tree->children[2]->children[0], tree->scope))->name != "int")
         semantic_assert(false, "cannot initialize array with non-int size");
       // PROBABLY CHANGE
       if(!scope->lookup(tree->children[2]->children[1]->children[0]->tok->text))
@@ -226,12 +227,11 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
     }
     if (tree->children[2]->description == "new"){
       std::string ident = tree->children[0]->tok->text; 
-      // SAME WITH THIS ONE
-      if(!scope->lookup(tree->children[2]->children[0]->tok->text))
-        semantic_assert(false, "cannot initialize \"%s\" with non-class type", ident.c_str());
-      rhs = scope->lookup(tree->children[2]->children[0]->tok->text);
+      //SAME WITH THIS ONE
+      if(!dynamic_cast<s_class*>(scope->lookup(tree->children[2]->children[0]->tok->text)))
+        semantic_assert(false, "cannot initialize \"%s\" with non-class type or undefined type", ident.c_str());
+      rhs = dynamic_cast<s_class*>(scope->lookup(tree->children[2]->children[0]->tok->text));
     }
-
     // cast correctly to s_type:
     s_type * lhs_type;
     s_type * rhs_type;
@@ -240,6 +240,8 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
       lhs_type = dynamic_cast<s_var*>(lhs)->type;
     else if (dynamic_cast<s_function*>(lhs))
       lhs_type = dynamic_cast<s_function*>(lhs)->return_type;
+    else if (dynamic_cast<s_class*>(lhs))
+      lhs_type = dynamic_cast<s_class*>(lhs);
     else if (lhs == semantics_bool_type)
       lhs_type = semantics_bool_type;
     else if (lhs == semantics_int_type)
@@ -255,6 +257,8 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
       rhs_type = dynamic_cast<s_var*>(rhs)->type;
     else if (dynamic_cast<s_function*>(rhs))
       rhs_type = dynamic_cast<s_function*>(rhs)->return_type;
+    else if (dynamic_cast<s_class*> (rhs))
+      rhs_type = dynamic_cast<s_class*> (rhs);
     else if (rhs == semantics_bool_type)
       rhs_type = semantics_bool_type;
     else if (rhs == semantics_int_type)
@@ -272,7 +276,7 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
       // ensure lhs and rhs have same type
       semantic_assert(ensure_same_type(lhs_type, rhs_type),
                       "lhs and rhs of assignment statement not of same type.");
-      return rhs_type;
+      return lhs_type;
     }
 
     if (binop_type == "EQ" || binop_type == "NE")
@@ -321,56 +325,77 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
 
   }
 
-  else if (tree->description == "fieldacess")
+  else if (tree->description == "fieldaccess")
   {
-    // semantics* c = ensure_legal_expression(tree->children[0], scope, current_class); // instance of class c
-    semantics* ci = ensure_legal_expression(tree->children[1], scope); // class c instance var/method
+    semantics* a = ensure_legal_expression(tree->children[0], tree->scope);
+    if(!dynamic_cast<s_class*>(a))
+        semantic_assert(false, 
+                        "fieldaccess is limited to defined classes, \"%s\" is not a defined class",
+                        tree->children[0]->tok->text.c_str());
 
-    if (dynamic_cast<s_var*>(ci))
-      return dynamic_cast<s_var*>(ci)->type;
-    else if (dynamic_cast<s_function*>(ci))
-      return dynamic_cast<s_function*>(ci)->return_type;
-    else
-    {
-      semantic_assert(false,
-                      "you shouldnt be here");
-      return nullptr;
+    s_class *curr_class = dynamic_cast<s_class*>(a);
+    std::string curr_var = tree->children[1]->tok->text;
+    std::vector<s_var*> locals = curr_class->locals;
+    for (size_t i = 0; i<locals.size(); i++){
+      if(locals[i]->name == curr_var)
+        return locals[i]->type; 
     }
+    semantic_assert(false, 
+                    "instance variable \"%s\" does not exist in class \"%s\"",
+                    curr_var.c_str(), curr_class->name.c_str());
   }
 
   else if (tree->description == "call")
   {
-    // tree->children[0]->tok->text = func name
-    // tree->children[1]->tok->text = params
-    semantic_assert(ensure_legal_expression(tree->children[0], scope), 
-                    "undefined func \"%s\"", 
-                    tree->children[0]->tok->text.c_str());
-    semantics* f;
-    if(scope->lookup(tree->children[0]->tok->text)){
-      f = scope->lookup(tree->children[0]->tok->text);
-    }
-    if (current_class && find_function_in_class_hierarchy(current_class, tree->children[0]->tok->text)){
-      f = find_function_in_class_hierarchy(current_class, tree->children[0]->tok->text);
-    }
-    s_function* curr_func = dynamic_cast<s_function*> (f); 
-    std::vector<s_var *> params = curr_func->params; 
-    if(tree->children[1]->children.size() != params.size()){
-      if(tree->children[1]->children.size() < params.size())
-        semantic_assert(false, "too few arguments for function \"%s\"", 
-                        tree->children[0]->tok->text.c_str());
-      else
+    if (tree->children[0]->description == "fieldaccess"){
+      semantics* a = ensure_legal_expression(tree->children[0]->children[0], tree->scope);
+      if(!dynamic_cast<s_class*>(a))
         semantic_assert(false, 
-                        "too many arugments for function \"%s\"", 
-                        tree->children[0]->tok->text.c_str()); 
+                        "fieldaccess is limited to defined classes, \"%s\" is not a defined class",
+                        tree->children[0]->children[0]->tok->text.c_str());
+    s_class *curr_class = dynamic_cast<s_class*>(a);
+    std::string curr_function = tree->children[0]->children[1]->tok->text; 
+    std::map<std::string, s_function *> function_map = curr_class->function_map;
+    std::map<std::string, s_function*>::iterator iter;
+    for (iter = std::begin(function_map); iter != std::end(function_map); iter++){
+      if (iter->first == curr_function)
+        return iter->second->return_type; 
     }
-    for (size_t i = 0; i < params.size(); i++){
-      if(params[i]->type != ensure_legal_expression(tree->children[1]->children[i], scope)){
-        semantic_assert(false, 
-                        "function call arguments does not match param list for \"%s\"", 
-                        tree->children[0]->tok->text.c_str());
+    semantic_assert(false, 
+                    "function \"%s\" does not exist in class \"%s\"",
+                    curr_function.c_str(), curr_class->name.c_str());
+    } 
+    else{
+      semantic_assert(ensure_legal_expression(tree->children[0], scope), 
+                      "undefined func \"%s\"", 
+                      tree->children[0]->tok->text.c_str());
+      semantics* f;
+      if(scope->lookup(tree->children[0]->tok->text)){
+        f = scope->lookup(tree->children[0]->tok->text);
+      }
+      if (current_class && find_function_in_class_hierarchy(current_class, tree->children[0]->tok->text)){
+        f = find_function_in_class_hierarchy(current_class, tree->children[0]->tok->text);
+      }
+      s_function* curr_func = dynamic_cast<s_function*> (f); 
+      std::vector<s_var *> params = curr_func->params; 
+      if(tree->children[1]->children.size() != params.size()){
+        if(tree->children[1]->children.size() < params.size())
+          semantic_assert(false, "too few arguments for function \"%s\"", 
+                          tree->children[0]->tok->text.c_str());
+        else
+          semantic_assert(false, 
+                          "too many arugments for function \"%s\"", 
+                          tree->children[0]->tok->text.c_str()); 
+      }
+      for (size_t i = 0; i < params.size(); i++){
+        if(params[i]->type != ensure_legal_expression(tree->children[1]->children[i], tree->scope)){
+          semantic_assert(false, 
+                          "function call arguments does not match param list for \"%s\"", 
+                          tree->children[0]->tok->text.c_str());
         }
       }
-    return curr_func->return_type;
+      return curr_func->return_type;
+    }
   }
   return nullptr;
 }
@@ -404,15 +429,16 @@ semantics * sem_pass2(parse_tree *tree, symtab *scope)
      return nullptr;
   }
 
-  if (tree->description == "class")
-    current_class = dynamic_cast<s_class*>(scope->lookup(tree->children[0]->tok->text));
-
   if (tree->tok)
   {
     // if (current_class == nullptr && tree->to_string().substr(0, 4) == "THIS")
     //   semantic_assert(false,
     //                  "using \"this\" outside of a class.");
       return scope->lookup(tree->tok->text);
+  }
+
+  if(tree->description == "fields"){
+    return ensure_legal_expression(tree, tree->scope);
   }
 
   if (tree->description == "functiondecl"){

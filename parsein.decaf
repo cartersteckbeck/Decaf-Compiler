@@ -544,41 +544,41 @@ Hello, world
 //   A a;
 // }
 //
-//test 44 
-class A {}
-
-void main()
-{
-  A a;
-  a = New(A);
-}
-
-//
+//test 44 passed
 // class A {}
-//
+
+// void main()
+// {
+//   A a;
+//   a = New(A);
+// }
+
+// test 45 passed
+// class A {}
+
 // void main()
 // {
 //   B a;
 //   a = New(A);
 // }
 //
-//
+// test 46 passed
 // class A {}
-//
+
 // void main()
 // {
 //   A a;
 //   a = New(B);
 // }
-//
-//
+
+// test 47 passed
 // class A {
-//   void func()
-//   {
-//     Print("Hi mom!");
-//   }
+//   // void func()
+//   // {
+//   //   Print("Hi mom!");
+//   // }
 // }
-//
+
 // void main()
 // {
 //   A a;
@@ -589,19 +589,20 @@ void main()
 // /* Output:
 // Hi mom!
 // */
-//
+
+// test 48 passed
 // class A {
 //   void func()
 //   {
 //     Print("Hi mom!");
 //   }
 // }
-//
+
 // void func()
 // {
 //   Print("Hi Dad!");
 // }
-//
+
 // void main()
 // {
 //   A a;
@@ -614,7 +615,7 @@ void main()
 // Hi mom!
 // Hi Dad!
 // */
-//
+//test 49 passed
 // class A {
 //   int func()
 //   {
@@ -622,12 +623,12 @@ void main()
 //     return 5;
 //   }
 // }
-//
+
 // void func()
 // {
 //   Print("Hi Dad!");
 // }
-//
+
 // void main()
 // {
 //   A a;
@@ -641,7 +642,7 @@ void main()
 // 5
 // Hi Dad!
 // */
-//
+//test 50 passed
 // class A {
 //   int func()
 //   {
@@ -649,15 +650,15 @@ void main()
 //     return 5;
 //   }
 // }
-//
+
 // void main()
 // {
 //   A a;
 //   a = New(A);
 //   Print(a);
 // }
-//
-//
+
+// test 51
 // class A {
 //   int x;
 //   int func()
@@ -667,7 +668,7 @@ void main()
 //     return 5;
 //   }
 // }
-//
+
 // void main()
 // {
 //   A a;
@@ -676,7 +677,7 @@ void main()
 //   Print(a.x);
 // }
 //
-//
+//test 52 passed
 // class A {
 //   int fact(int x)
 //   {
@@ -685,7 +686,7 @@ void main()
 //     return x * fact(x-1);
 //   }
 // }
-//
+
 // void main()
 // {
 //   A a;
@@ -693,18 +694,18 @@ void main()
 //   Print(a.fact(6));
 // }
 //
-//
-// class A {
-//   void foo()
-//   {
-//     Print("Hi mom!");
-//   }
-// }
-//
-// void main()
-// {
-//   New(A).foo();
-// }
+// test 53
+class A {
+  void foo()
+  {
+    Print("Hi mom!");
+  }
+}
+
+void main()
+{
+  New(A).foo();
+}
 //
 //
 //
