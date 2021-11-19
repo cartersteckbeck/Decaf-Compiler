@@ -226,7 +226,7 @@ semantics* ensure_legal_expression(parse_tree* tree, symtab* scope)
     }
     if (tree->children[2]->description == "new"){
       std::string ident = tree->children[0]->tok->text; 
-      //SAME WITH THIS ONE
+      // SAME WITH THIS ONE
       if(!scope->lookup(tree->children[2]->children[0]->tok->text))
         semantic_assert(false, "cannot initialize \"%s\" with non-class type", ident.c_str());
       rhs = scope->lookup(tree->children[2]->children[0]->tok->text);
