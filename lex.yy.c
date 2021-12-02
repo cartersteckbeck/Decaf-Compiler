@@ -1067,17 +1067,17 @@ YY_RULE_SETUP
 case 3:
 YY_RULE_SETUP
 #line 25 "decaf.l"
-{return make_token(T_DOUBLE, current_line);}
+{return make_token(T_DOUBLE, current_line, yytext);}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 26 "decaf.l"
-{return make_token(T_BOOL, current_line);}
+{return make_token(T_BOOL, current_line, yytext);}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 27 "decaf.l"
-{return make_token(T_STRING, current_line);}
+{return make_token(T_STRING, current_line, yytext);}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP

@@ -77,7 +77,7 @@ void func_p1(parse_tree* i, parse_tree* t)
     typestr = "void";
     type = current_scope->lookup(typestr);
   }
-  else 
+  else
   {
     typestr = t->children[0]->tok->text;
     type = current_scope->lookup(typestr);
@@ -191,18 +191,25 @@ void variable_p1(parse_tree* type, parse_tree* identifier)
   else
     typestr = type->children[0]->tok->text;
 
-  semantics *existing_type = current_scope->lookup(typestr);
-
-  /* create variable */
-  s_var *new_var = new s_var(ident, dynamic_cast<s_type *>(existing_type));
-
-  /* if undefined type, add to scope with defined=false */
-  if (!existing_type)
-  {
-    s_class *undefined_class = new s_class(typestr);
-    undefined_class->defined = false;
-    current_scope->add(typestr, undefined_class);
+  s_type *var_type;
+  s_class *class_type;
+  if(dynamic_cast<s_class*>(current_scope->lookup(typestr)))
+    class_type = dynamic_cast<s_class*>(top_scope->lookup(typestr));
+  else if (dynamic_cast<s_type*>(current_scope->lookup(typestr)))
+    var_type = dynamic_cast<s_type*>(current_scope->lookup(typestr));
+  else if (current_scope->lookup(typestr))
+    semantic_assert(false,
+                    "cannot create variable of type that is not a class or primtype");
+  else {
+    class_type = new s_class(typestr);
+    class_type->defined = false;
+    top_scope->add(typestr, class_type);
   }
+  s_var *new_var;
+  if (var_type)
+    new_var = new s_var(ident, var_type);
+  else
+    new_var = new s_var(ident, class_type);
 
   current_scope->add(ident, new_var);
 
@@ -430,7 +437,6 @@ matched_while: common_while matched_stmt[ms] {$$ ->add_child($ms); $$ = $common_
 
 unmatched_while: common_while unmatched_stmt[us] {$$->add_child($us); $$ = $common_while; }
 
-
 /* for statements */
 common_for: for '(' expr[a] ';' expr[b] ';' expr[c] ')' {$$ = new parse_tree("for", 3, $a, $b, $c); }
           | for '('         ';' expr[b] ';' expr[c] ')' {$$ = new parse_tree("for", 3, nullptr, $b, $c); }
@@ -478,7 +484,7 @@ expr8: expr9
      | Lvalue
 
 expr9: constant
-     | this
+     | this {semantic_assert(current_class, "cannot use \"this\" outside of a class");}
      | '(' expr ')' { $$ = $expr; }
      | call
      | readint '(' ')'

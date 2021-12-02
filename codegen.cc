@@ -36,6 +36,7 @@ void gen_expr(parse_tree *tree)
    // deleted stuff. This whole file is useless.
 }
 
+// Jasmin directives show how to create instructions for assignment and general creation of labels (in discord)
 void gen_assign(parse_tree *tree)
 {
    parse_tree *lval = tree->children[0];
@@ -48,7 +49,12 @@ void gen_assign(parse_tree *tree)
 
 void gen_global_var(parse_tree *tree)
 {
-   // something happens here.
+   parse_tree *lval = tree->children[0];
+   parse_tree *rval = tree->children[1];
+   gen_expr(rval);
+   codegen_error("Not sure where to go from here with %s and %s",
+                 lval->to_string().c_str(),
+                 rval->to_string().c_str());
 }
 
 void gen_preamble()
@@ -58,6 +64,7 @@ void gen_preamble()
    (*gout) << "" << std::endl;
 }
 
+// Boilerplate depends on program? Not sure. 
 void gen_init_boilerplate()
 {
    (*gout) << ".method                  public <init>()V" << std::endl
@@ -69,7 +76,12 @@ void gen_init_boilerplate()
          << ".end method" << std::endl;
 }
 
-void gen_main_block(parse_tree *tree)
+void gen_main_program(parse_tree *tree)
 {
-
+   if(!tree)
+      return; 
+   if(tree->tok)
+      gen_expr(tree);
+   for(size_t i = 0; i < tree->children.size(); i++)
+      gen_main_program(tree->children[i]);
 }

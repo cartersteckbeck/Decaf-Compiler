@@ -205,14 +205,28 @@ void symtab::check_undefined_usertypes() const
 {
   for (auto const& x : table)
   {
-    std::cout << x.first << "::" << x.second->to_string() << std::endl;
     if (dynamic_cast<s_usertype*>(x.second))
     {
+      if(dynamic_cast<s_class*>(x.second) && dynamic_cast<s_class*>(x.second)->interfaces.size() != 0)
+      {
+        std::vector<s_interface*> interfaces =  dynamic_cast<s_class*>(x.second)->interfaces;
+        for(size_t i = 0; i < interfaces.size(); i++)
+          if(interfaces[i]->defined == false)
+            for (auto const& y: table)
+              if(dynamic_cast<s_interface*>(y.second) &&
+                 dynamic_cast<s_interface*>(y.second)->defined &&
+                 y.first == interfaces[i]->name)
+                interfaces[i] = dynamic_cast<s_interface*>(y.second);
+        dynamic_cast<s_class*>(x.second)->interfaces = interfaces;
+
+      }
+      else
+      {
       s_usertype *p = dynamic_cast<s_usertype*>(x.second);
-        std::cout << p->to_string() << std::endl;
       semantic_assert(p->defined,
                       "\"%s\" is undefined",
                       p->to_string().c_str());
+      }
     }
   }
 }

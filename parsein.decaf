@@ -1,13 +1,12 @@
 // // /* starting with variable declarations, the easiest */
 // test 1 passed
-// void main()
-// {
-//   int x;
-//   double x;
-// }
+void main()
+{
+  int x;
+}
 // test 2 passed
 // int x;
-//
+
 // void main()
 // {
 //   double x;
@@ -26,7 +25,7 @@
 
 // test 4 passed
 // int x;
-
+//
 // void main()
 // {
 //   double x;
@@ -35,7 +34,7 @@
 
 // test 5 passed
 // int x;
-
+//
 // void main()
 // {
 //   Print("Hello, world!");
@@ -43,7 +42,7 @@
 
 // test 6 passed
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -61,7 +60,7 @@ true
 
 // test 7 passed
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -93,7 +92,7 @@ true
 
 // test 9 passed
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -103,9 +102,9 @@ true
 //   y = 7;
 //   z = z < y;
 // }
-// int x;
 //
 // test 10 passed
+// int x;
 // void main()
 // {
 //   int x;
@@ -120,7 +119,7 @@ true
 // }
 // test 11 passed
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -144,7 +143,7 @@ Hello, world
 
 // test 12 passed
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -158,7 +157,7 @@ Hello, world
 
 // test 13
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -172,7 +171,7 @@ Hello, world
 
 // test 14 passed
 // int x;
-
+//
 // void main()
 // {
 //   int x;
@@ -186,7 +185,7 @@ Hello, world
 
 // test 15 passed
 // int x;
-
+//
 // void main()
 // {
 //   this;
@@ -199,14 +198,15 @@ Hello, world
 // }
 
 //test 17 passed
-// void foo()
-// {
-//   Print("Hello, world!");
-// }
 
 // void main()
 // {
 //   bar();
+// }
+//
+// void foo()
+// {
+//   Print("Hello, world!");
 // }
 
 // test 18 passed
@@ -214,7 +214,7 @@ Hello, world
 // {
 //   Print("Hello, world!");
 // }
-
+//
 // void main()
 // {
 //   foo();
@@ -225,7 +225,7 @@ Hello, world
 // {
 //   Print(s);
 // }
-
+//
 // void main()
 // {
 //     foo();
@@ -236,10 +236,11 @@ Hello, world
 // {
 //   Print(s);
 // }
-
+//
 // void main()
 // {
-//   foo();
+//   string s;
+//   foo(s);
 // }
 
 //test 21 passed
@@ -247,7 +248,7 @@ Hello, world
 // {
 //   Print(s);
 // }
-
+//
 // void main()
 // {
 //   fact(5);
@@ -258,7 +259,7 @@ Hello, world
 // {
 //   Print(s);
 // }
-
+//
 // void main()
 // {
 //   fact(5);
@@ -276,7 +277,7 @@ Hello, world
 //     return 1;
 //   return s * fact(s-1);
 // }
-
+//
 // void main()
 // {
 //   fact(5);
@@ -296,19 +297,19 @@ Hello, world
 // {
 //   Print(s);
 // }
-
+//
 // void main()
 // {
 //   int x;
 //   x = fact(5);
 // }
 
-//test 23b passed 
+//test 23b passed
 // void fact(int s)
 // {
 //   Print(s);
 // }
-
+//
 // void main()
 // {
 //   fact(fact(5));
@@ -318,10 +319,10 @@ Hello, world
 // int fact(int s)
 // {
 //   if (s == 0)
-//     return 1;
-//   //return 5;
+//     return "hi mom";
+//   return 5;
 // }
-
+//
 // void main()
 // {
 //   fact(5);
@@ -346,7 +347,7 @@ Hello, world
 //     return 1;
 //   return s * fact(s-1);
 // }
-
+//
 // void main()
 // {
 //   fact(5);
@@ -357,7 +358,7 @@ Hello, world
 // {
 //   return "Hi Mom!";
 // }
-
+//
 // int fact(int s)
 // {
 //   Print(s);
@@ -375,7 +376,7 @@ Hello, world
 // {
 //   return fact(v - 1);
 // }
-
+//
 // int fact(int s)
 // {
 //   Print(s);
@@ -383,7 +384,7 @@ Hello, world
 //     return 1;
 //   return s * bar(s);
 // }
-
+//
 // void main()
 // {
 //   fact(5);
@@ -394,14 +395,14 @@ Hello, world
 // {
 //   return fact(v - 1);
 // }
-
+//
 // int fact(int s)
 // {
 //   if (s == 0)
 //     return 1;
 //   return s * bar(s);
 // }
-
+//
 // void main()
 // {
 //   Print(fact(5));
@@ -429,7 +430,7 @@ Hello, world
 // void main()
 // {
 //   int [] A;
-//   A[1.0] = 4;
+//   A[1] = 4;
 // }
 
 //test 33 - OUR PARSER DOES NOT CHECK FOR MULTI-DIMENSIONAL ARRAYS
@@ -439,14 +440,14 @@ Hello, world
 //   A[0][1] = 4;
 // }
 
-//test 34 
+//test 34
 // void main()
 // {
 //   int [] B;
 //   B[0] = B;
 // }
 
-// test 35 
+// test 35
 // void main()
 // {
 //   int [] [] A;
@@ -462,9 +463,9 @@ Hello, world
 //
 // void main()
 // {
-//   int [] [] A;
+//   // int [] [] A;
 //   int [] B;
-//   foo(B);
+//   foo(5);
 // }
 
 // test 37
@@ -494,10 +495,11 @@ Hello, world
 // */
 
 //test 39 passed
+// WE DO NOT DEAL WITH UNDEFINED CLASSES
 // void main()
 // {
 //   int [] A;
-//   A = NewArray(10.2, int);
+//   A = NewArray(10, int);
 //   A[0] = 4;
 //   Print(A[0]);
 // }
@@ -517,45 +519,56 @@ Hello, world
 // {
 //    return;
 // }
-
+//
 // void main()
 // {
 //   bar();
 // }
 
-//test 42 pased
+//test 42 passed
 // void bar()
 // {
 //    return true;
 // }
-
+//
 // void main()
 // {
 //   bar();
 // }
-//
+
 //
 
 //test 43 passed
-// class A {}
 
-// void main()
-// {
-//   A a;
-// }
+// class A {}
 //
-//test 44 passed
-// class A {}
-
 // void main()
 // {
 //   A a;
 //   a = New(A);
 // }
 
+//test 44 passed
+//THIS WORKS
+
+// void main()
+// {
+//   func();
+// }
+//
+// void func(){}
+
+//THIS DOES NOT WORK
+// WRITE THIS LATER
+// PASS 1.5, CHECK IF A VAR HAS UNDEFINED TYPE, IF SO, CHANGE TO UPDATED TYPE
+
+// void main()
+// {
+//   A a;
+// }
 // test 45 passed
 // class A {}
-
+//
 // void main()
 // {
 //   B a;
@@ -564,7 +577,7 @@ Hello, world
 //
 // test 46 passed
 // class A {}
-
+//
 // void main()
 // {
 //   A a;
@@ -572,13 +585,7 @@ Hello, world
 // }
 
 // test 47 passed
-// class A {
-//   // void func()
-//   // {
-//   //   Print("Hi mom!");
-//   // }
-// }
-
+//
 // void main()
 // {
 //   A a;
@@ -586,18 +593,19 @@ Hello, world
 //   a.func();
 // }
 //
+// class A {
+//   void func()
+//   {
+//     Print("hi");
+//   }
+// }
+//
 // /* Output:
 // Hi mom!
 // */
 
 // test 48 passed
-// class A {
-//   void func()
-//   {
-//     Print("Hi mom!");
-//   }
-// }
-
+//
 // void func()
 // {
 //   Print("Hi Dad!");
@@ -608,7 +616,14 @@ Hello, world
 //   A a;
 //   a = New(A);
 //   a.func();
-//   func();
+//   //func();
+// }
+
+// class A {
+//   // void func()
+//   // {
+//   //   Print("Hi mom!");
+//   // }
 // }
 //
 // /* Output:
@@ -623,12 +638,12 @@ Hello, world
 //     return 5;
 //   }
 // }
-
+//
 // void func()
 // {
 //   Print("Hi Dad!");
 // }
-
+//
 // void main()
 // {
 //   A a;
@@ -650,7 +665,7 @@ Hello, world
 //     return 5;
 //   }
 // }
-
+//
 // void main()
 // {
 //   A a;
@@ -659,6 +674,8 @@ Hello, world
 // }
 
 // test 51
+
+// int x;
 // class A {
 //   int x;
 //   int func()
@@ -668,7 +685,7 @@ Hello, world
 //     return 5;
 //   }
 // }
-
+//
 // void main()
 // {
 //   A a;
@@ -686,29 +703,30 @@ Hello, world
 //     return x * fact(x-1);
 //   }
 // }
-
+//
 // void main()
 // {
 //   A a;
 //   a = New(A);
-//   Print(a.fact(6));
+//   a.fact(6);
 // }
 //
-// test 53
-class A {
-  void foo()
-  {
-    Print("Hi mom!");
-  }
-}
+// test 53 passed
+// void main()
+// {
+//   New(A).foo();
+// }
+//
+// class A {
+//   void foo()
+//   {
+//     Print("Hi mom!");
+//   }
+// }
 
-void main()
-{
-  New(A).foo();
-}
+
 //
-//
-//
+// test 54 passed
 // class A {
 //   int fact(int x)
 //   {
@@ -722,13 +740,13 @@ void main()
 // {
 //   A a;
 //   a = New(A);
-//   Print(New(A).fact(6));
+//   Print(New(A).fact());
 // }
 //
 // /* Output:
 // 720
 // */
-//
+// test 55 PASSED
 // class A {
 //   int fact(int x)
 //   {
@@ -750,7 +768,8 @@ void main()
 // /* Output:
 // 720
 // */
-//
+// test 56
+// NEED TO DEAL IN PASS 1.5
 // class A {
 //   int fact(int x)
 //   {
@@ -767,8 +786,6 @@ void main()
 //       return 0;
 //     return x + fact(x-1);
 //   }
-//
-//
 // }
 //
 // void main()
@@ -781,7 +798,7 @@ void main()
 // /* Output:
 // 21
 // */
-//
+// test 57
 // class A {
 //   int fact(int x)
 //   {
@@ -798,8 +815,6 @@ void main()
 //       return 0.0;
 //     return x + fact(x-1);
 //   }
-//
-//
 // }
 //
 // void main()
@@ -809,7 +824,7 @@ void main()
 //   Print(a.fact(6));
 // }
 //
-//
+// test 58 p a s s e d
 // class A {
 //   int fact(int x)
 //   {
@@ -826,8 +841,6 @@ void main()
 //       return 0;
 //     return x + fact(x-1);
 //   }
-//
-//
 // }
 //
 // void main()
@@ -840,7 +853,7 @@ void main()
 // /* Output:
 // 21
 // */
-//
+// test 59 passed
 // class A {
 //   int fact(int x)
 //   {
@@ -850,7 +863,7 @@ void main()
 //   }
 // }
 //
-// class B extends A {
+// class B extends A{
 //   double fact(double x)
 //   {
 //     if (x == 0.0)
@@ -866,7 +879,7 @@ void main()
 //   B();
 // }
 //
-//
+// test 60 passed
 // class Z extends Y {}
 // class Y extends X {}
 // class X extends Z {}
@@ -874,7 +887,7 @@ void main()
 // void main()
 // {
 // }
-//
+// test 61 passed
 // int x;
 //
 // class A {
@@ -897,8 +910,8 @@ void main()
 // 5
 // 6
 // */
+// test 62 passed
 // int x;
-//
 // class A {
 //   int x;
 //   void set(int y) { x = y; }
@@ -913,12 +926,13 @@ void main()
 //   x = 6;
 //   Print(a.x);
 // }
-//
+
+// test 63
 // class A {
 //   int x;
 //   void set(int y) { x = y; }
 //   int get() { return x; }
-//   void add(A other) { x = x + other.x; }
+//   void add(A other) { x = x + x; }
 // }
 //
 // interface Setter {
@@ -941,6 +955,8 @@ void main()
 // 5
 // 6
 // */
+
+// test 64
 // class A {
 //   int x;
 //   void set(int y) { x = y; }
@@ -969,7 +985,7 @@ void main()
 // 11
 // 6
 // */
-//
+//test 65
 // class A implements Setter {
 //   int x;
 //   void set(int y) { x = y; }
@@ -984,22 +1000,22 @@ void main()
 // void main()
 // {
 // }
-//
+// test 66 passed
+
 // class A implements Setter {
 //   int x;
-//   void set(int y) { x = y; }
-//   int get() { return x; }
-//   void add(A other) { x = x + other.x; }
+//   void set(int x){}
+//   void new(){}
+//   void notsure(){}
 // }
 //
 // interface Setter {
 //   void set(int x);
-//   void probe();
+//   void probe(int z);
 // }
 //
-// void main()
-// {
-// }
+// void main(){}
+
 //
 // class A implements Setter {
 //   int x;
